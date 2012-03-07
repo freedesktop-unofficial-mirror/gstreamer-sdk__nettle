@@ -4544,7 +4544,7 @@ case "$host_os" in
     LIBHOGWEED_SONAME='$(LIBHOGWEED_FORLINK).$(LIBHOGWEED_MAJOR)'
     LIBHOGWEED_FILE='$(LIBHOGWEED_SONAME).$(LIBHOGWEED_MINOR)'
     LIBHOGWEED_LINK='$(CC) -dynamiclib $(LDFLAGS)'
-    LIBHOGWEED_LIBS=''
+    LIBHOGWEED_LIBS='$(LIBS) $(LIBNETTLE_FORLINK)'
     ;;
   solaris*)
     # Sun's ld uses -h to set the soname, and this option is passed
