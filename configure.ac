@@ -252,8 +252,13 @@ LSH_CCPIC
 
 SHLIBCFLAGS="$CCPIC"
 
+IF_WIN32='#'
+IF_NOT_WIN32=''
+
 case "$host_os" in
   mingw32*)
+    IF_WIN32=''
+    IF_NOT_WIN32='#'
     LIBNETTLE_FORLINK='libnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
     LIBNETTLE_SONAME=''
     LIBNETTLE_FILE='libnettle.dll.a'
@@ -267,6 +272,8 @@ case "$host_os" in
     LIBHOGWEED_LIBS='-Wl,--no-whole-archive $(LIBS) libnettle.dll.a'
     ;;
   cygwin*)
+    IF_WIN32=''
+    IF_NOT_WIN32='#'
     LIBNETTLE_FORLINK='cygnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
     LIBNETTLE_SONAME=''
     LIBNETTLE_FILE='libnettle.dll.a'
@@ -327,6 +334,9 @@ case "$host_os" in
     LIBHOGWEED_LIBS='-lnettle -lgmp'
     ;;
 esac
+
+AC_SUBST([IF_WIN32])
+AC_SUBST([IF_NOT_WIN32])
 
 if test "x$enable_pic" = xyes; then
   CCPIC_MAYBE="$CCPIC"

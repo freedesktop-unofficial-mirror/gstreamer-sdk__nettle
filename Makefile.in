@@ -285,7 +285,7 @@ install-static: $(LIBTARGETS)
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(libdir) ; \
 	done
 
-install-shared-nettle: $(LIBNETTLE_FORLINK)
+@IF_NOT_WIN32@install-shared-nettle: $(LIBNETTLE_FORLINK)
 	$(MKDIR_P) $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
 	[ -z "$(LIBNETTLE_SONAME)" ] \
@@ -293,13 +293,23 @@ install-shared-nettle: $(LIBNETTLE_FORLINK)
 		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_SONAME) \
 		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_FORLINK))
 
-install-shared-hogweed: $(LIBHOGWEED_FORLINK)
+@IF_WIN32@install-shared-nettle: $(LIBNETTLE_FORLINK)
+	$(MKDIR_P) $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) $(LIBNETTLE_FILE) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
+	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(bindir)/$(LIBNETTLE_FORLINK)
+
+@IF_NOT_WIN32@install-shared-hogweed: $(LIBHOGWEED_FORLINK)
 	$(MKDIR_P) $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
 	[ -z "$(LIBHOGWEED_SONAME)" ] \
                 || (cd $(DESTDIR)$(libdir) \
 		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_SONAME) \
 		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_FORLINK))
+
+@IF_WIN32@install-shared-hogweed: $(LIBHOGWEED_FORLINK)
+	$(MKDIR_P) $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) $(LIBHOGWEED_FILE) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
+	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(bindir)/$(LIBHOGWEED_FILE)
 
 # I'd like to use makes VPATH search to locate the files to be
 # installed. But it seems most make programs don't set $<, $^, $? and
