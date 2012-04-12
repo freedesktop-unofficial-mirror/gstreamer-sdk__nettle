@@ -619,6 +619,8 @@ LIBNETTLE_SONAME
 LIBNETTLE_FORLINK
 LIBNETTLE_MINOR
 LIBNETTLE_MAJOR
+IF_WIN32
+IF_NOT_WIN32
 SHLIBCFLAGS
 ASM_ALIGN_LOG
 ASM_MARK_NOEXEC_STACK
@@ -4506,8 +4508,13 @@ $as_echo "$CCPIC" >&6; }
 
 SHLIBCFLAGS="$CCPIC"
 
+IF_WIN32='#'
+IF_NOT_WIN32=''
+
 case "$host_os" in
   mingw32*)
+    IF_WIN32=''
+    IF_NOT_WIN32='#'
     LIBNETTLE_FORLINK='libnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
     LIBNETTLE_SONAME=''
     LIBNETTLE_FILE='libnettle.dll.a'
@@ -4521,6 +4528,8 @@ case "$host_os" in
     LIBHOGWEED_LIBS='-Wl,--no-whole-archive $(LIBS) libnettle.dll.a'
     ;;
   cygwin*)
+    IF_WIN32=''
+    IF_NOT_WIN32='#'
     LIBNETTLE_FORLINK='cygnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
     LIBNETTLE_SONAME=''
     LIBNETTLE_FILE='libnettle.dll.a'
