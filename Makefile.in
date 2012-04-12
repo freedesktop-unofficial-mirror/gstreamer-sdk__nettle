@@ -286,30 +286,30 @@ install-static: $(LIBTARGETS)
 	done
 
 @IF_NOT_WIN32@install-shared-nettle: $(LIBNETTLE_FORLINK)
-	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
-	[ -z "$(LIBNETTLE_SONAME)" ] \
-                || (cd $(DESTDIR)$(libdir) \
-		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_SONAME) \
-		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_FORLINK))
+@IF_NOT_WIN32@	$(MKDIR_P) $(DESTDIR)$(libdir)
+@IF_NOT_WIN32@	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
+@IF_NOT_WIN32@	[i -z "$(LIBNETTLE_SONAME)" ] \
+@IF_NOT_WIN32@     || (cd $(DESTDIR)$(libdir) \
+@IF_NOT_WIN32@		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_SONAME) \
+@IF_NOT_WIN32@		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_FORLINK))
 
 @IF_WIN32@install-shared-nettle: $(LIBNETTLE_FORLINK)
-	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBNETTLE_FILE) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
-	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(bindir)/$(LIBNETTLE_FORLINK)
+@IF_WIN32@	$(MKDIR_P) $(DESTDIR)$(libdir)
+@IF_WIN32@	$(INSTALL_DATA) $(LIBNETTLE_FILE) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
+@IF_WIN32@	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(bindir)/$(LIBNETTLE_FORLINK)
 
 @IF_NOT_WIN32@install-shared-hogweed: $(LIBHOGWEED_FORLINK)
-	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
-	[ -z "$(LIBHOGWEED_SONAME)" ] \
-                || (cd $(DESTDIR)$(libdir) \
-		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_SONAME) \
-		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_FORLINK))
+@IF_NOT_WIN32@	$(MKDIR_P) $(DESTDIR)$(libdir)
+@IF_NOT_WIN32@	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
+@IF_NOT_WIN32@	[ -z "$(LIBHOGWEED_SONAME)" ] \
+@IF_NOT_WIN32@                || (cd $(DESTDIR)$(libdir) \
+@IF_NOT_WIN32@		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_SONAME) \
+@IF_NOT_WIN32@		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_FORLINK))
 
 @IF_WIN32@install-shared-hogweed: $(LIBHOGWEED_FORLINK)
-	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBHOGWEED_FILE) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
-	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(bindir)/$(LIBHOGWEED_FILE)
+@IF_WIN32@	$(MKDIR_P) $(DESTDIR)$(libdir)
+@IF_WIN32@	$(INSTALL_DATA) $(LIBHOGWEED_FILE) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
+@IF_WIN32@	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(bindir)/$(LIBHOGWEED_FORLINK)
 
 # I'd like to use makes VPATH search to locate the files to be
 # installed. But it seems most make programs don't set $<, $^, $? and
