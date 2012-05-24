@@ -296,7 +296,7 @@ case "$host_os" in
     LIBHOGWEED_FORLINK=libhogweed.dylib
     LIBHOGWEED_SONAME='libhogweed.$(LIBHOGWEED_MAJOR).dylib'
     LIBHOGWEED_FILE='libhogweed.$(LIBHOGWEED_MAJOR).$(LIBHOGWEED_MINOR).dylib'
-    LIBHOGWEED_LINK='$(CC) -dynamiclib $(LDFLAGS)'
+    LIBHOGWEED_LINK='$(CC) -dynamiclib -L. $(LDFLAGS)'
     LIBHOGWEED_LIBS='$(LIBS) $(LIBNETTLE_FORLINK)'
     ;;
   solaris*)

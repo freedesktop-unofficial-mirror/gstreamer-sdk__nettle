@@ -4546,7 +4546,7 @@ case "$host_os" in
     LIBNETTLE_FORLINK='libnettle.dylib'
     LIBNETTLE_SONAME='libnettle.$(LIBNETTLE_MAJOR).dylib'
     LIBNETTLE_FILE='libnettle.$(LIBNETTLE_MAJOR).$(LIBNETTLE_MINOR).dylib'
-    LIBNETTLE_LINK='$(CC) -dynamiclib $(LDFLAGS) -install_name ${libdir}/$(LIBNETTLE_SONAME) -compatibility_version $(LIBNETTLE_MAJOR) -current_version $(LIBNETTLE_MAJOR).$(LIBNETTLE_MINOR)'
+    LIBNETTLE_LINK='$(CC) -dynamiclib -L. $(LDFLAGS) -install_name ${libdir}/$(LIBNETTLE_SONAME) -compatibility_version $(LIBNETTLE_MAJOR) -current_version $(LIBNETTLE_MAJOR).$(LIBNETTLE_MINOR)'
     LIBNETTLE_LIBS=''
 
     LIBHOGWEED_FORLINK=libhogweed.dylib
