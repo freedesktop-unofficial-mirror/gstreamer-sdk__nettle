@@ -4,7 +4,7 @@
 
 /* nettle, low-level cryptographics library
  *
- * Copyright (C) 2001, 2010 Niels Möller
+ * Copyright (C) 2001, 2010 Niels MÃ¶ller
  *  
  * The nettle library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -119,6 +119,8 @@ do {						\
 		  (dst) += (blocksize),		\
 		  (src) += (blocksize)) )
 
+#define ROTL32(n,x) ((((x))<<(n)) | (((x))>>(32-(n))))
+
 /* Requires that size >= 2 */
 #define INCREMENT(size, ctr)			\
   do {						\
@@ -132,7 +134,7 @@ do {						\
   } while (0)
 
 
-/* Helper macro for Merkle-Damgård hash functions. Assumes the context
+/* Helper macro for Merkle-DamgÃ¥rd hash functions. Assumes the context
    structs includes the following fields:
 
      xxx count_low, count_high;		// Two word block count

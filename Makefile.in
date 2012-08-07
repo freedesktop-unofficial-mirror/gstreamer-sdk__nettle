@@ -23,8 +23,17 @@ PRE_CPPFLAGS = -I.
 LIBTARGETS = libnettle.a @IF_HOGWEED@ libhogweed.a
 SHLIBTARGETS = $(LIBNETTLE_FORLINK) @IF_HOGWEED@ $(LIBHOGWEED_FORLINK)
 
-TARGETS = aesdata$(EXEEXT) desdata$(EXEEXT) shadata$(EXEEXT) gcmdata$(EXEEXT)\
+getopt_SOURCES = getopt.c getopt1.c
+getopt_TARGETS = $(getopt_SOURCES:.c=.$(OBJEXT))
+
+internal_SOURCES = nettle-internal.c
+internal_TARGETS = $(internal_SOURCES:.c=.$(OBJEXT))
+
+TARGETS = aesdata$(EXEEXT) desdata$(EXEEXT) twofishdata$(EXEEXT) \
+	  shadata$(EXEEXT) gcmdata$(EXEEXT) \
+	  $(getopt_TARGETS) $(internal_TARGETS) \
 	  $(LIBTARGETS) @IF_SHARED@ $(SHLIBTARGETS)
+IMPLICIT_TARGETS = @IF_DLL@ $(LIBNETTLE_FILE) $(LIBHOGWEED_FILE)
 
 DOCTARGETS = nettle.info nettle.html nettle.pdf
 
@@ -72,6 +81,7 @@ nettle_SOURCES = aes-decrypt-internal.c aes-decrypt.c \
 		 md2.c md2-meta.c md4.c md4-meta.c \
 		 md5.c md5-compress.c md5-compat.c md5-meta.c \
 		 ripemd160.c ripemd160-compress.c ripemd160-meta.c \
+		 salsa20-crypt.c salsa20-set-key.c \
 		 sha1.c sha1-compress.c sha1-meta.c \
 		 sha256.c sha256-compress.c sha224-meta.c sha256-meta.c \
 		 sha512.c sha512-compress.c sha384-meta.c sha512-meta.c \
@@ -82,22 +92,24 @@ nettle_SOURCES = aes-decrypt-internal.c aes-decrypt.c \
 		 buffer.c buffer-init.c realloc.c \
 		 nettle-meta-hashes.c nettle-meta-ciphers.c \
 		 nettle-meta-armors.c \
-		 nettle-internal.c write-be32.c write-le32.c
+		 write-be32.c write-le32.c
 
 hogweed_SOURCES = sexp.c sexp-format.c \
 		  sexp-transport.c sexp-transport-format.c \
 		  bignum.c bignum-next-prime.c \
 		  bignum-random.c bignum-random-prime.c \
 		  sexp2bignum.c \
-		  pkcs1.c pkcs1-rsa-md5.c pkcs1-rsa-sha1.c \
+		  pkcs1.c pkcs1-encrypt.c pkcs1-decrypt.c \
+		  pkcs1-rsa-digest.c pkcs1-rsa-md5.c pkcs1-rsa-sha1.c \
 		  pkcs1-rsa-sha256.c pkcs1-rsa-sha512.c \
 		  rsa.c rsa-sign.c rsa-verify.c \
+		  rsa-pkcs1-sign.c rsa-pkcs1-sign-tr.c rsa-pkcs1-verify.c \
 		  rsa-md5-sign.c rsa-md5-verify.c \
 		  rsa-sha1-sign.c rsa-sha1-verify.c \
 		  rsa-sha256-sign.c rsa-sha256-verify.c \
 		  rsa-sha512-sign.c rsa-sha512-verify.c \
-		  rsa-encrypt.c rsa-decrypt.c \
-		  rsa-keygen.c rsa-compat.c \
+		  rsa-encrypt.c rsa-decrypt.c rsa-decrypt-tr.c \
+		  rsa-keygen.c rsa-compat.c rsa-blind.c \
 		  rsa2sexp.c sexp2rsa.c \
 		  dsa.c dsa-sign.c dsa-verify.c dsa-keygen.c \
 		  dsa-sha1-sign.c dsa-sha1-verify.c \
@@ -118,15 +130,18 @@ HEADERS = aes.h arcfour.h arctwo.h asn1.h bignum.h blowfish.h \
 	  memxor.h \
 	  nettle-meta.h nettle-types.h \
 	  pgp.h pkcs1.h realloc.h ripemd160.h rsa.h rsa-compat.h \
-	  sexp.h \
+	  salsa20.h sexp.h \
 	  serpent.h sha.h twofish.h \
 	  yarrow.h
 
 INSTALL_HEADERS = $(HEADERS) nettle-stdint.h
 
-SOURCES = $(nettle_SOURCES) $(hogweed_SOURCES) aesdata.c desdata.c shadata.c gcmdata.c
+SOURCES = $(nettle_SOURCES) $(hogweed_SOURCES) \
+	  $(getopt_SOURCES) $(internal_SOURCES) \
+	  aesdata.c desdata.c twofishdata.c shadata.c gcmdata.c
 
-DISTFILES = $(SOURCES) $(HEADERS) .bootstrap aclocal.m4 configure.ac \
+DISTFILES = $(SOURCES) $(HEADERS) getopt.h .bootstrap run-tests \
+	aclocal.m4 configure.ac \
 	configure stamp-h.in \
 	config.guess config.sub install-sh texinfo.tex \
 	config.h.in config.m4.in config.make.in	Makefile.in \
@@ -160,18 +175,26 @@ libhogweed.a: $(hogweed_OBJS)
 	$(COMPILE) $(CCPIC_MAYBE) -c $< \
 	&& $(DEP_PROCESS)
 
-# Rules building shared libraries
+# Rules building shared libraries.
 $(LIBNETTLE_FORLINK): $(nettle_PURE_OBJS)
 	$(LIBNETTLE_LINK) $(nettle_PURE_OBJS) -o $@ $(LIBNETTLE_LIBS)
 	-mkdir .lib 2>/dev/null
-	[ -z "$(LIBNETTLE_SONAME)" ] || (cd .lib \
-          && ln -sf ../$(LIBNETTLE_FORLINK) $(LIBNETTLE_SONAME))
+	(cd .lib \
+          && rm -f $(LIBNETTLE_FORLINK) \
+	  && $(LN_S) ../$(LIBNETTLE_FORLINK) $(LIBNETTLE_FORLINK) \
+	  && [ -z "$(LIBNETTLE_SONAME)" ] \
+	  || { rm -f $(LIBNETTLE_SONAME) \
+	       && $(LN_S) $(LIBNETTLE_FORLINK) $(LIBNETTLE_SONAME) ; } )
 
 $(LIBHOGWEED_FORLINK): $(hogweed_PURE_OBJS) $(LIBNETTLE_FORLINK)
 	$(LIBHOGWEED_LINK) $(hogweed_PURE_OBJS) -o $@ $(LIBHOGWEED_LIBS)
 	-mkdir .lib 2>/dev/null
-	[ -z "$(LIBHOGWEED_SONAME)" ] || (cd .lib \
-          && ln -sf ../$(LIBHOGWEED_FORLINK) $(LIBHOGWEED_SONAME))
+	(cd .lib \
+          && rm -f $(LIBHOGWEED_FORLINK) \
+	  && $(LN_S) ../$(LIBHOGWEED_FORLINK) $(LIBHOGWEED_FORLINK) \
+	  && [ -z "$(LIBHOGWEED_SONAME)" ] \
+	  || { rm -f $(LIBHOGWEED_SONAME) \
+	       && $(LN_S) $(LIBHOGWEED_FORLINK) $(LIBHOGWEED_SONAME) ; } )
 
 .c.p$(OBJEXT):
 	$(COMPILE) $(SHLIBCFLAGS) -c $< -o $@ \
@@ -183,6 +206,9 @@ aesdata$(EXEEXT): aesdata.$(OBJEXT)
 
 desdata$(EXEEXT): desdata.$(OBJEXT)
 	$(LINK) desdata.$(OBJEXT) $(LIBS) -o desdata$(EXEEXT)
+
+twofishdata$(EXEEXT): twofishdata.$(OBJEXT)
+	$(LINK) twofishdata.$(OBJEXT) $(LIBS) -o twofishdata$(EXEEXT)
 
 shadata$(EXEEXT): shadata.$(OBJEXT)
 	$(LINK) shadata.$(OBJEXT) $(LIBS) -lm -o shadata$(EXEEXT)
@@ -229,7 +255,7 @@ des.$(OBJEXT): des.c des.h $(des_headers)
 	  && test -s $@T && mv -f $@T $@
 
 .texinfo.dvi:
-	cd $(srcdir) && texi2dvi `basename "$<"`
+	cd $(srcdir) && texi2dvi -b `basename "$<"`
 
 .dvi.ps:
 	cd $(srcdir) && dvips -Ppdf -G0 -o `basename "$<" .dvi`.ps `basename "$<"`
@@ -285,21 +311,31 @@ install-static: $(LIBTARGETS)
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(libdir) ; \
 	done
 
-install-shared-nettle: $(LIBNETTLE_FORLINK)
+install-dll-nettle:
+	$(MKDIR_P) $(DESTDIR)$(bindir)
+	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(bindir)/$(LIBNETTLE_FORLINK)
+
+install-shared-nettle: $(LIBNETTLE_FORLINK) @IF_DLL@ install-dll-nettle
 	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBNETTLE_FORLINK) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
+	$(INSTALL_DATA) $(LIBNETTLE_FILE_SRC) $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
 	[ -z "$(LIBNETTLE_SONAME)" ] \
                 || (cd $(DESTDIR)$(libdir) \
-		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_SONAME) \
-		&& ln -sf $(LIBNETTLE_FILE) $(LIBNETTLE_FORLINK))
+		&& rm -f $(LIBNETTLE_SONAME) $(LIBNETTLE_FORLINK) \
+		&& $(LN_S) $(LIBNETTLE_FILE) $(LIBNETTLE_SONAME) \
+		&& $(LN_S) $(LIBNETTLE_FILE) $(LIBNETTLE_FORLINK))
 
-install-shared-hogweed: $(LIBHOGWEED_FORLINK)
+install-dll-hogweed:
+	$(MKDIR_P) $(DESTDIR)$(bindir)
+	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(bindir)/$(LIBHOGWEED_FORLINK)
+
+install-shared-hogweed: $(LIBHOGWEED_FORLINK) @IF_DLL@ install-dll-hogweed
 	$(MKDIR_P) $(DESTDIR)$(libdir)
-	$(INSTALL_DATA) $(LIBHOGWEED_FORLINK) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
+	$(INSTALL_DATA) $(LIBHOGWEED_FILE_SRC) $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
 	[ -z "$(LIBHOGWEED_SONAME)" ] \
                 || (cd $(DESTDIR)$(libdir) \
-		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_SONAME) \
-		&& ln -sf $(LIBHOGWEED_FILE) $(LIBHOGWEED_FORLINK))
+		&& rm -f $(LIBHOGWEED_SONAME) $(LIBHOGWEED_FORLINK) \
+		&& $(LN_S) $(LIBHOGWEED_FILE) $(LIBHOGWEED_SONAME) \
+		&& $(LN_S) $(LIBHOGWEED_FILE) $(LIBHOGWEED_FORLINK))
 
 # I'd like to use makes VPATH search to locate the files to be
 # installed. But it seems most make programs don't set $<, $^, $? and
@@ -356,12 +392,18 @@ uninstall-info:
 # FIXME: Leaves the links around
 uninstall-shared: uninstall-shared-nettle @IF_HOGWEED@ uninstall-shared-hogweed
 
-uninstall-shared-nettle:
+uninstall-dll-nettle:
+	rm -f $(DESTDIR)$(bindir)/$(LIBNETTLE_FORLINK)
+
+uninstall-shared-nettle: @IF_DLL@ uninstall-dll-nettle
 	rm -f $(DESTDIR)$(libdir)/$(LIBNETTLE_FILE)
 	[ -z "$(LIBNETTLE_SONAME)" ] \
 		|| rm -f $(LIBNETTLE_SONAME) $(LIBNETTLE_FORLINK)
 
-uninstall-shared-hogweed:
+uninstall-dll-hogweed:
+	rm -f $(DESTDIR)$(bindir)/$(LIBHOGWEED_FORLINK)
+
+uninstall-shared-hogweed: @IF_DLL@ uninstall-dll-hogweed
 	rm -f $(DESTDIR)$(libdir)/$(LIBHOGWEED_FILE)
 	[ -z "$(LIBHOGWEED_SONAME)" ] \
 		|| rm -f $(LIBHOGWEED_SONAME) $(LIBHOGWEED_FORLINK)
@@ -441,7 +483,7 @@ distcheck: dist
 	$(rm_distcheck)
 
 clean-here:
-	-rm -f $(TARGETS) *.$(OBJEXT) *.p$(OBJEXT) *.s
+	-rm -f $(TARGETS) $(IMPLICIT_TARGETS) *.$(OBJEXT) *.p$(OBJEXT) *.s
 	-rm -rf .lib
 
 distclean-here: clean-here

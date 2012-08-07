@@ -1,7 +1,7 @@
 C -*- mode: asm; asm-comment-char: ?C; -*-  
 C nettle, low-level cryptographics library
 C 
-C Copyright (C) 2010, Niels Möller
+C Copyright (C) 2010, Niels MÃ¶ller
 C  
 C The nettle library is free software; you can redistribute it and/or modify
 C it under the terms of the GNU Lesser General Public License as published by
@@ -171,21 +171,21 @@ PROLOGUE(_nettle_camellia_crypt)
 	movl	FRAME_CTX, KEY
 	movl	(KEY), TMP
 	subl	$8, TMP
-	mov	TMP, FRAME_CNT
+	movl	TMP, FRAME_CNT
 	C 	Whitening using first subkey 
-	xor	4(KEY), L0
-	xor	8(KEY), H0
-	add	$12, KEY
+	addl	$ALIGNOF_UINT64_T + 8, KEY
+	xorl	-8(KEY), L0
+	xorl	-4(KEY), H0
 
 	movl	FRAME_TABLE, T
 
 	ROUND6
 .Lround_loop:
-	add	$64, KEY
+	addl	$64, KEY
 	FL(L0, H0, -16)
 	FLINV(L1, H1, -8)
 	ROUND6
-	sub 	$8, FRAME_CNT	
+	subl 	$8, FRAME_CNT	
 	ja	.Lround_loop
 
 	movl	FRAME_DST, TMP

@@ -5,7 +5,7 @@
 
 /* nettle, low-level cryptographics library
  *
- * Copyright (C) 2001, 2003, 2006, 2010 Niels Möller
+ * Copyright (C) 2001, 2003, 2006, 2010 Niels MÃ¶ller
  *  
  * The nettle library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -42,10 +42,9 @@ rsa_sha512_verify(const struct rsa_public_key *key,
   int res;
   mpz_t m;
 
-  assert(key->size > 0);
   mpz_init(m);
   
-  res = (pkcs1_rsa_sha512_encode(m, key->size - 1, hash) 
+  res = (pkcs1_rsa_sha512_encode(m, key->size, hash) 
 	 && _rsa_verify(key, m, s));
   
   mpz_clear(m);
@@ -61,10 +60,9 @@ rsa_sha512_verify_digest(const struct rsa_public_key *key,
   int res;
   mpz_t m;
 
-  assert(key->size > 0);
   mpz_init(m);
   
-  res = (pkcs1_rsa_sha512_encode_digest(m, key->size - 1, digest)
+  res = (pkcs1_rsa_sha512_encode_digest(m, key->size, digest)
 	 && _rsa_verify(key, m, s));
   
   mpz_clear(m);

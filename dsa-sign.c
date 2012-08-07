@@ -5,7 +5,7 @@
 
 /* nettle, low-level cryptographics library
  *
- * Copyright (C) 2002, 2010 Niels Möller
+ * Copyright (C) 2002, 2010 Niels MÃ¶ller
  *  
  * The nettle library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -38,7 +38,7 @@
 int
 _dsa_sign(const struct dsa_public_key *pub,
 	  const struct dsa_private_key *key,
-	  void *random_ctx, nettle_random_func random,
+	  void *random_ctx, nettle_random_func *random,
 	  unsigned digest_size,
 	  const uint8_t *digest,
 	  struct dsa_signature *signature)

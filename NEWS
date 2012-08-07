@@ -1,3 +1,69 @@
+NEWS for the 2.5 release
+
+	This release includes important portability fixes for Windows
+	and MacOS. There are also a few new features.
+
+	First a *warning*: Some internal functions have been removed
+	from the library. Since the functions in question are internal
+	and not documented, this is not considered a change of ABI or
+	API. Programs explicitly using any of these functions will
+	break.
+	
+	* The function pkcs1_signature_prefix has been renamed to
+	  _pkcs1_signature_prefix, and with slightly different
+	  behavior.
+
+	* The file nettle-internal.c is no longer included in the
+          library (the features defined there are used by the
+          benchmark and test programs, and were never intended for
+          public use).
+
+	New features:
+
+	* Support for the salsa20 block cipher, including x86_64
+          assembler. Originally contributed by Simon Josefsson, based
+          on the reference implementation, then further optimized.
+
+	* Tentative interface for timing-resistant RSA functions,
+          contributed by Nikos Mavrogiannopoulos.
+
+	* A more general interface for PKCS#1 signatures, taking the
+          input in the form of a "DigestInfo". Suggested by Nikos
+          Mavrogiannopoulos.
+
+	Configuration:
+	
+	* Building of shared libraries (./configure --enable-shared)
+          is now enabled by default.
+
+	* Various portability fixes for MacOS and M$ Windows. A lot of
+	  this work done by Martin Storsjö.
+
+	* In particular, Nettle now hopefully works on 64-bit Windows
+	  builds, "W64", including the x86_64 assembly code.
+
+	Miscellaneous:
+	
+	* Documentation and example programs for the base16 and base64
+	  functions. Was contributed by Jeronimo Pellegrini back in
+	  2006, but unfortunately forgotten until now.
+
+	* Use an additional table to avoid GF2^8 multiplications in
+	  aes_invert_key (mainly used by aes_set_decrypt_key). Also
+	  tabulate round constants in aes_set_encrypt_key.
+
+	* The nettle repository has been migrated from cvs to git,
+	  with a public repository at
+	  http://git.lysator.liu.se/nettle. To make it independent of
+	  the LSH repository, a few files have been moved around.
+	  While at it, files have also been converted from latin-1 to
+	  utf-8.
+
+	The libraries are intended to be binary compatible with
+	nettle-2.2 and later. The shared library names are
+	libnettle.so.4.4 and libhogweed.so.2.2, with sonames still
+	libnettle.so.4 and libhogweed.so.2
+
 NEWS for the 2.4 release
 
 	This is a bugfix release only. It turned out ripemd160 in the
@@ -23,7 +89,7 @@ NEWS for the 2.3 release
 	  certain platforms. Should not affect any documented features
 	  of the library.
 
-	* Reorganization of the code for the various Merkle-Damg�rd
+	* Reorganization of the code for the various Merkle-Damgård
 	  hash functions. Some fields in the context structs for md4,
 	  md5 and sha1 have been renamed, for consistency.
 	  Applications should not peek inside these structs, and the
