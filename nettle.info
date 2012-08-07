@@ -1,10 +1,10 @@
 This is nettle.info, produced by makeinfo version 4.13 from
 nettle.texinfo.
 
-This manual is for the Nettle library (version 2.3), a low-level
+This manual is for the Nettle library (version 2.5), a low-level
 cryptographic library.
 
-   Originally written 2001 by Niels Möller, updated 2011.
+   Originally written 2001 by Niels MÃ¶ller, updated 2011.
 
      This manual is placed in the public domain. You may freely copy
      it, in whole or in part, with or without modification. Attribution
@@ -25,10 +25,10 @@ This document describes the Nettle low-level cryptographic library. You
 can use the library directly from your C programs, or write or use an
 object-oriented wrapper for your favorite language or application.
 
-   This manual is for the Nettle library (version 2.3), a low-level
+   This manual is for the Nettle library (version 2.5), a low-level
 cryptographic library.
 
-   Originally written 2001 by Niels Möller, updated 2011.
+   Originally written 2001 by Niels MÃ¶ller, updated 2011.
 
      This manual is placed in the public domain. You may freely copy
      it, in whole or in part, with or without modification. Attribution
@@ -56,6 +56,7 @@ Reference
 * Keyed hash functions::
 * Public-key algorithms::
 * Randomness::
+* Ascii encoding::
 * Miscellaneous functions::
 * Compatibility functions::
 
@@ -126,12 +127,12 @@ course appreciated, but it is not required.
 _AES_
      The implementation of the AES cipher (also known as rijndael) is
      written by Rafael Sevilla. Assembler for x86 by Rafael Sevilla and
-     Niels Möller, Sparc assembler by Niels Möller. Released under the
+     Niels MÃ¶ller, Sparc assembler by Niels MÃ¶ller. Released under the
      LGPL.
 
 _ARCFOUR_
      The implementation of the ARCFOUR (also known as RC4) cipher is
-     written by Niels Möller. Released under the LGPL.
+     written by Niels MÃ¶ller. Released under the LGPL.
 
 _ARCTWO_
      The implementation of the ARCTWO (also known as RC2) cipher is
@@ -141,12 +142,12 @@ _ARCTWO_
 _BLOWFISH_
      The implementation of the BLOWFISH cipher is written by Werner
      Koch, copyright owned by the Free Software Foundation. Also hacked
-     by Simon Josefsson and Niels Möller. Released under the LGPL.
+     by Simon Josefsson and Niels MÃ¶ller. Released under the LGPL.
 
 _CAMELLIA_
      The C implementation is by Nippon Telegraph and Telephone
-     Corporation (NTT), heavily modified by Niels Möller. Assembler for
-     x86 and x86_64 by Niels Möller. Released under the LGPL.
+     Corporation (NTT), heavily modified by Niels MÃ¶ller. Assembler for
+     x86 and x86_64 by Niels MÃ¶ller. Released under the LGPL.
 
 _CAST128_
      The implementation of the CAST128 cipher is written by Steve Reid.
@@ -158,7 +159,7 @@ _DES_
 
 _MD2_
      The implementation of MD2 is written by Andrew Kuchling, and hacked
-     some by Andreas Sigfridsson and Niels Möller. Python Cryptography
+     some by Andreas Sigfridsson and Niels MÃ¶ller. Python Cryptography
      Toolkit license (essentially public domain).
 
 _MD4_
@@ -168,7 +169,7 @@ _MD4_
 _MD5_
      The implementation of the MD5 message digest is written by Colin
      Plumb.  It has been hacked some more by Andrew Kuchling and Niels
-     Möller.  Released into the public domain.
+     MÃ¶ller.  Released into the public domain.
 
 _RIPMED160_
      The implementation of RIPEMD160 message digest is based on the
@@ -176,21 +177,27 @@ _RIPMED160_
      Foundation. Ported to Nettle by Andres Mejia. Released under the
      LGPL.
 
+_SALSA20_
+     The C implementation of SALSA20 is based on D. J. Bernstein's
+     reference implementation (in the public domain), adapted to Nettle
+     by Simon Josefsson, and heavily modified by Niels MÃ¶ller. Assembly
+     for x86_64 by Niels MÃ¶ller. Released under the LGPL.
+
 _SERPENT_
      The implementation of the SERPENT cipher is based on the code in
      libgcrypt, copyright owned by the Free Software Foundation.
      Adapted to Nettle by Simon Josefsson and heavily modified by Niels
-     Möller. Assembly for x86_64 by Niels Möller. Released under the
+     MÃ¶ller. Assembly for x86_64 by Niels MÃ¶ller. Released under the
      LGPL.
 
 _SHA1_
      The C implementation of the SHA1 message digest is written by Peter
-     Gutmann, and hacked some more by Andrew Kuchling and Niels Möller.
-     Released into the public domain. Assembler for x86 by Niels Möller,
+     Gutmann, and hacked some more by Andrew Kuchling and Niels MÃ¶ller.
+     Released into the public domain. Assembler for x86 by Niels MÃ¶ller,
      released under the LGPL.
 
 _SHA224, SHA256, SHA384, and SHA512_
-     Written by Niels Möller, using Peter Gutmann's SHA1 code as a
+     Written by Niels MÃ¶ller, using Peter Gutmann's SHA1 code as a
      model.  Released under the LGPL.
 
 _TWOFISH_
@@ -198,11 +205,11 @@ _TWOFISH_
      Rooij.  Released under the LGPL.
 
 _RSA_
-     Written by Niels Möller, released under the LGPL. Uses the GMP
+     Written by Niels MÃ¶ller, released under the LGPL. Uses the GMP
      library for bignum operations.
 
 _DSA_
-     Written by Niels Möller, released under the LGPL. Uses the GMP
+     Written by Niels MÃ¶ller, released under the LGPL. Uses the GMP
      library for bignum operations.
 
 
@@ -337,6 +344,7 @@ This chapter describes all the Nettle functions, grouped by family.
 * Keyed hash functions::
 * Public-key algorithms::
 * Randomness::
+* Ascii encoding::
 * Miscellaneous functions::
 * Compatibility functions::
 
@@ -1209,8 +1217,72 @@ the parity bits before calling `des3_set_key'.
           uint8_t *DST, const uint8_t *SRC)
      Analogous to `des_encrypt'
 
-6.2.9 SERPENT
+6.2.9 Salsa20
 -------------
+
+Salsa20 is a fairly recent stream cipher designed by D. J. Bernstein. It
+is built on the observation that a cryptographic hash function can be
+used for encryption: Form the hash input from the secret key and a
+counter, xor the hash output and the first block of the plaintext, then
+increment the counter to process the next block (similar to CTR mode,
+see *note CTR::). Bernstein defined an encryption algorithm, Snuffle,
+in this way to ridicule United States export restrictions which treated
+hash functions as nice and harmless, but ciphers as dangerous munitions.
+
+   Salsa20 uses the same idea, but with a new specialized hash function
+to mix key, block counter, and a couple of constants (input and output
+are the same size, making it not directly applicable for use as a
+general hash function). It's also designed for speed; on x86_64, it is
+currently the fastest cipher offered by nettle. It uses a block size of
+512 bits (64 octets) and there are two specified key sizes, 128 and 256
+bits (16 and 32 octets).
+
+   When using Salsa20 to process a message, one specifies both a key
+and a "nonce", the latter playing a similar rÃ´le to the initialization
+vector (IV) used with CBC or CTR mode. For this reason, Nettle uses the
+term IV to refer to the Salsa20 nonce. One can use the same key for
+several messages, provided one uses a unique random iv for each
+message. The iv is 64 bits (8 octets). The block counter is initialized
+to zero for each message, and is also 64 bits (8 octets). Nettle
+defines Salsa20 in `<nettle/salsa20.h>'.
+
+ -- Context struct: struct salsa20_ctx
+
+ -- Constant: SALSA20_MIN_KEY_SIZE
+ -- Constant: SALSA20_MAX_KEY_SIZE
+     The two supported key sizes, 16 and 32 octets.
+
+ -- Constant: SALSA20_KEY_SIZE
+     Recommended key size, 32.
+
+ -- Constant: SALSA20_BLOCK_SIZE
+     Salsa20 block size, 64.
+
+ -- Constant: SALSA20_IV_SIZE
+     Size of the IV, 8.
+
+ -- Function: void salsa20_set_key (struct salsa20_ctx *CTX, unsigned
+          LENGTH, const uint8_t *KEY)
+     Initialize the cipher. The same function is used for both
+     encryption and decryption. Before using the cipher, you _must_
+     also call `salsa20_set_iv', see below.
+
+ -- Function: void salsa20_set_iv (struct salsa20_ctx *CTX, const
+          uint8_t *IV)
+     Sets the IV. It is always of size `SALSA20_IV_SIZE', 8 octets.
+     This function also initializes the block counter, setting it to
+     zero.
+
+ -- Function: void salsa20_crypt (struct salsa20_ctx *CTX, unsigned
+          LENGTH, uint8_t *DST, const uint8_t *SRC)
+     Encrypts or decrypts the data of a message, using salsa20. When a
+     message is encrypted using a sequence of calls to `salsa20_crypt',
+     all but the last call _must_ use a length that is a multiple of
+     `SALSA20_BLOCK_SIZE'.
+
+
+6.2.10 SERPENT
+--------------
 
 SERPENT is one of the AES finalists, designed by Ross Anderson, Eli
 Biham and Lars Knudsen. Thus, the interface and properties are similar
@@ -1248,7 +1320,7 @@ larger ones. Nettle defines SERPENT in `<nettle/serpent.h>'.
           LENGTH, uint8_t *DST, const uint8_t *SRC)
      Analogous to `serpent_encrypt'
 
-6.2.10 TWOFISH
+6.2.11 TWOFISH
 --------------
 
 Another AES finalist, this one designed by Bruce Schneier and others.
@@ -1284,7 +1356,7 @@ Nettle defines it in `<nettle/twofish.h>'.
           LENGTH, uint8_t *DST, const uint8_t *SRC)
      Analogous to `twofish_encrypt'
 
-6.2.11 `struct nettle_cipher'
+6.2.12 `struct nettle_cipher'
 -----------------------------
 
 Nettle includes a struct including information about some of the more
@@ -1463,7 +1535,7 @@ ciphertext blocks `C_1',...  `C_n' as follows:
      C_(n-1) = E_k(IC + n - 2) XOR M_(n-1)
      C_n = E_k(IC + n - 1) [1..m] XOR M_n
 
-   The IC is the initial value for the counter, it plays a similar role
+   The IC is the initial value for the counter, it plays a similar rÃ´le
 as the IV for CBC. When adding, `IC + x', IC is interpreted as an
 integer, in network byte order. For the last block, `E_k(IC + n - 1)
 [1..m]' means that the cipher output is truncated to `m' bytes.
@@ -2457,7 +2529,7 @@ RSA function.
      small.
 
 
-File: nettle.info,  Node: Randomness,  Next: Miscellaneous functions,  Prev: Public-key algorithms,  Up: Reference
+File: nettle.info,  Node: Randomness,  Next: Ascii encoding,  Prev: Public-key algorithms,  Up: Reference
 
 6.6 Randomness
 ==============
@@ -2762,9 +2834,152 @@ User keyboard input.
      `yarrow256_update'. Usually, 0, 1 or 2 bits.
 
 
-File: nettle.info,  Node: Miscellaneous functions,  Next: Compatibility functions,  Prev: Randomness,  Up: Reference
+File: nettle.info,  Node: Ascii encoding,  Next: Miscellaneous functions,  Prev: Randomness,  Up: Reference
 
-6.7 Miscellaneous functions
+6.7 Ascii encoding
+==================
+
+Encryption will transform your data from text into binary format, and
+that may be a problem if you want, for example, to send the data as if
+it was plain text in an email (or store it along with descriptive text
+in a file). You may then use an encoding from binary to text: each
+binary byte is translated into a number of bytes of plain text.
+
+   A base-N encoding of data is one representation of data that only
+uses N different symbols (instead of the 256 possible values of a byte).
+
+   The base64 encoding will always use alphanumeric (upper and lower
+case) characters and the '+', '/' and '=' symbols to represent the
+data. Four output characters are generated for each three bytes of
+input. In case the length of the input is not a multiple of three,
+padding characters are added at the end.
+
+   The base16 encoding, also known as "hexadecimal", uses the decimal
+digits and the letters from A to F. Two hexadecimal digits are generated
+for each input byte. Base16 may be useful if you want to use the data
+for filenames or URLs, for example.
+
+   Nettle supports both base64 and base16 encoding and decoding.
+
+   Encoding and decoding uses a context struct to maintain its state
+(with the exception of base16 encoding, which doesn't need any). To
+encode or decode the your data, first initialize the context, then call
+the update function as many times as necessary, and complete the
+operation by calling the final function.
+
+   The following functions can be used to perform base64 encoding and
+decoding.  They are defined in `<nettle/base64.h>'.
+
+ -- Context struct: struct base64_encode_ctx
+
+ -- Function: void base64_encode_init (struct base64_encode_ctx *CTX)
+     Initializes a base64 context. This is necessary before starting an
+     encoding session.
+
+ -- Function: unsigned base64_encode_single (struct base64_encode_ctx
+          *CTX, uint8_t *DST, uint8_t SRC)
+     Encodes a single byte. Returns amount of output (always 1 or 2).
+
+ -- Macro: BASE64_ENCODE_LENGTH (LENGTH)
+     The maximum number of output bytes when passing LENGTH input bytes
+     to `base64_encode_update'.
+
+ -- Function: unsigned base64_encode_update (struct base64_encode_ctx
+          *CTX, uint8_t *DST, unsigned LENGTH, const uint8_t *SRC)
+     After CTX is initialized, this function may be called to encode
+     LENGTH bytes from SRC. The result will be placed in DST, and the
+     return value will be the number of bytes generated. Note that DST
+     must be at least of size BASE64_ENCODE_LENGTH(LENGTH).
+
+ -- Constant: BASE64_ENCODE_FINAL_LENGTH
+     The maximum amount of output from `base64_encode_final'.
+
+ -- Function: unsigned base64_encode_final (struct base64_encode_ctx
+          *CTX, uint8_t *DST)
+     After calling base64_encode_update one or more times, this function
+     should be called to generate the final output bytes, including any
+     needed paddding. The return value is the number of output bytes
+     generated.
+
+ -- Context struct: struct base64_decode_ctx
+
+ -- Function: void base64_decode_init (struct base64_decode_ctx *CTX)
+     Initializes a base64 decoding context. This is necessary before
+     starting a decoding session.
+
+ -- Function: int base64_decode_single (struct base64_decode_ctx *CTX,
+          uint8_t *DST, uint8_t SRC)
+     Decodes a single byte (SRC) and stores the result in DST.  Returns
+     amount of output (0 or 1), or -1 on errors.
+
+ -- Macro: BASE64_DECODE_LENGTH (LENGTH)
+     The maximum number of output bytes when passing LENGTH input bytes
+     to `base64_decode_update'.
+
+ -- Function: void base64_decode_update (struct base64_decode_ctx *CTX,
+          unsigned *DST_LENGTH, uint8_t *DST, unsigned SRC_LENGTH,
+          const uint8_t *SRC)
+     After CTX is initialized, this function may be called to decode
+     SRC_LENGTH bytes from SRC. DST should point to an area of size at
+     least BASE64_DECODE_LENGTH(LENGTH), and for sanity checking,
+     DST_LENGTH should be initialized to the size of that area before
+     the call.  DST_LENGTH is updated to the amount of decoded output.
+     The function will return 1 on success and 0 on error.
+
+ -- Function: int base64_decode_final (struct base64_decode_ctx *CTX)
+     Check that final padding is correct. Returns 1 on success, and 0 on
+     error.
+
+   Similarly to the base64 functions, the following functions perform
+base16 encoding, and are defined in `<nettle/base16.h>'. Note that
+there is no encoding context necessary for doing base16 encoding.
+
+ -- Function: void base16_encode_single (uint8_t *DST, uint8_t SRC)
+     Encodes a single byte. Always stores two digits in DST[0] and
+     DST[1].
+
+ -- Macro: BASE16_ENCODE_LENGTH (LENGTH)
+     The number of output bytes when passing LENGTH input bytes to
+     `base16_encode_update'.
+
+ -- Function: void base16_encode_update (uint8_t *DST, unsigned LENGTH,
+          const uint8_t *SRC)
+     Always stores BASE16_ENCODE_LENGTH(LENGTH) digits in DST.
+
+ -- Context struct: struct base16_decode_ctx
+
+ -- Function: void base16_decode_init (struct base16_decode_ctx *CTX)
+     Initializes a base16 decoding context. This is necessary before
+     starting a decoding session.
+
+ -- Function: int base16_decode_single (struct base16_decode_ctx *CTX,
+          uint8_t *DST, uint8_t SRC)
+     Decodes a single byte from SRC into DST. Returns amount of output
+     (0 or 1), or -1 on errors.
+
+ -- Macro: BASE16_DECODE_LENGTH (LENGTH)
+     The maximum number of output bytes when passing LENGTH input bytes
+     to `base16_decode_update'.
+
+ -- Function: int base16_decode_update (struct base16_decode_ctx *CTX,
+          unsigned *DST_LENGTH, uint8_t *DST, unsigned SRC_LENGTH,
+          const uint8_t *SRC)
+     After CTX is initialized, this function may be called to decode
+     SRC_LENGTH bytes from SRC. DST should point to an area of size at
+     least BASE16_DECODE_LENGTH(LENGTH), and for sanity checking,
+     DST_LENGTH should be initialized to the size of that area before
+     the call.  DST_LENGTH is updated to the amount of decoded output.
+     The function will return 1 on success and 0 on error.
+
+ -- Function: int base16_decode_final (struct base16_decode_ctx *CTX)
+     Checks that the end of data is correct (i.e., an even number of
+     hexadecimal digits have been seen). Returns 1 on success, and 0 on
+     error.
+
+
+File: nettle.info,  Node: Miscellaneous functions,  Next: Compatibility functions,  Prev: Ascii encoding,  Up: Reference
+
+6.8 Miscellaneous functions
 ===========================
 
  -- Function: uint8_t * memxor (uint8_t *DST, const uint8_t *SRC,
@@ -2778,7 +2993,7 @@ File: nettle.info,  Node: Miscellaneous functions,  Next: Compatibility function
 
 File: nettle.info,  Node: Compatibility functions,  Prev: Miscellaneous functions,  Up: Reference
 
-6.8 Compatibility functions
+6.9 Compatibility functions
 ===========================
 
 For convenience, Nettle includes alternative interfaces to some
@@ -2849,15 +3064,13 @@ Nettle uses `autoconf'. To build it, unpack the source and run
      make check
      make install
 
-to install in the default location, `/usr/local'. The library files are
-installed in `/use/local/lib/libnettle.a' `/use/local/lib/libhogweed.a'
-and the include files are installed in `/use/local/include/nettle/'.
+to install in under the default prefix, `/usr/local'.
 
    To get a list of configure options, use `./configure --help'.
 
-   By default, only static libraries are built and installed. To also
-build and install shared libraries, use the ` --enable-shared' option
-to `./configure'.
+   By default, both static and shared libraries are built and
+installed. To omit building the shared libraries, use the `
+--disable-shared' option to `./configure'.
 
    Using GNU make is recommended. For other make programs, in particular
 BSD make, you may have to use the `--disable-dependency-tracking'
@@ -2884,6 +3097,24 @@ Function and Concept Index
 * arctwo_set_key:                        Cipher functions.    (line 217)
 * arctwo_set_key_ekb:                    Cipher functions.    (line 215)
 * arctwo_set_key_gutmann:                Cipher functions.    (line 219)
+* base16_decode_final:                   Ascii encoding.      (line 139)
+* base16_decode_init:                    Ascii encoding.      (line 116)
+* BASE16_DECODE_LENGTH:                  Ascii encoding.      (line 125)
+* base16_decode_single:                  Ascii encoding.      (line 121)
+* base16_decode_update:                  Ascii encoding.      (line 131)
+* BASE16_ENCODE_LENGTH:                  Ascii encoding.      (line 106)
+* base16_encode_single:                  Ascii encoding.      (line 102)
+* base16_encode_update:                  Ascii encoding.      (line 111)
+* base64_decode_final:                   Ascii encoding.      (line  94)
+* base64_decode_init:                    Ascii encoding.      (line  71)
+* BASE64_DECODE_LENGTH:                  Ascii encoding.      (line  80)
+* base64_decode_single:                  Ascii encoding.      (line  76)
+* base64_decode_update:                  Ascii encoding.      (line  86)
+* base64_encode_final:                   Ascii encoding.      (line  63)
+* base64_encode_init:                    Ascii encoding.      (line  40)
+* BASE64_ENCODE_LENGTH:                  Ascii encoding.      (line  48)
+* base64_encode_single:                  Ascii encoding.      (line  45)
+* base64_encode_update:                  Ascii encoding.      (line  53)
 * Block Cipher:                          Cipher functions.    (line  12)
 * blowfish_decrypt:                      Cipher functions.    (line 282)
 * blowfish_encrypt:                      Cipher functions.    (line 275)
@@ -3050,9 +3281,12 @@ Function and Concept Index
 * rsa_sha512_sign_digest:                RSA.                 (line 151)
 * rsa_sha512_verify:                     RSA.                 (line 165)
 * rsa_sha512_verify_digest:              RSA.                 (line 177)
-* serpent_decrypt:                       Cipher functions.    (line 533)
-* serpent_encrypt:                       Cipher functions.    (line 526)
-* serpent_set_key:                       Cipher functions.    (line 521)
+* salsa20_crypt:                         Cipher functions.    (line 554)
+* salsa20_set_iv:                        Cipher functions.    (line 548)
+* salsa20_set_key:                       Cipher functions.    (line 542)
+* serpent_decrypt:                       Cipher functions.    (line 597)
+* serpent_encrypt:                       Cipher functions.    (line 590)
+* serpent_set_key:                       Cipher functions.    (line 585)
 * sha1_digest:                           Hash functions.      (line 197)
 * sha1_init:                             Hash functions.      (line 189)
 * sha1_update:                           Hash functions.      (line 193)
@@ -3069,9 +3303,9 @@ Function and Concept Index
 * sha512_init:                           Hash functions.      (line 293)
 * sha512_update:                         Hash functions.      (line 297)
 * Stream Cipher:                         Cipher functions.    (line  12)
-* twofish_decrypt:                       Cipher functions.    (line 569)
-* twofish_encrypt:                       Cipher functions.    (line 562)
-* twofish_set_key:                       Cipher functions.    (line 557)
+* twofish_decrypt:                       Cipher functions.    (line 633)
+* twofish_encrypt:                       Cipher functions.    (line 626)
+* twofish_set_key:                       Cipher functions.    (line 621)
 * yarrow256_fast_reseed:                 Randomness.          (line 277)
 * yarrow256_init:                        Randomness.          (line 226)
 * yarrow256_is_seeded:                   Randomness.          (line 267)
@@ -3086,35 +3320,36 @@ Function and Concept Index
 
 
 Tag Table:
-Node: Top542
-Node: Introduction2138
-Node: Copyright3704
-Node: Conventions7439
-Node: Example9401
-Node: Linking10648
-Node: Reference11481
-Node: Hash functions11849
-Node: Cipher functions25050
-Node: Cipher modes50940
-Node: CBC51968
-Node: CTR55242
-Node: GCM57768
-Node: Keyed hash functions65329
-Node: Public-key algorithms74686
-Node: RSA78606
-Node: RSA-Footnotes89220
-Ref: RSA-Footnote-189273
-Node: DSA89442
-Node: Randomness100785
-Node: Miscellaneous functions115898
-Node: Compatibility functions116402
-Node: Nettle soup117647
-Node: Installation118640
-Node: Index119487
+Node: Top543
+Node: Introduction2159
+Node: Copyright3725
+Node: Conventions7757
+Node: Example9719
+Node: Linking10966
+Node: Reference11799
+Node: Hash functions12186
+Node: Cipher functions25387
+Node: Cipher modes54077
+Node: CBC55105
+Node: CTR58379
+Node: GCM60906
+Node: Keyed hash functions68467
+Node: Public-key algorithms77824
+Node: RSA81744
+Node: RSA-Footnotes92358
+Ref: RSA-Footnote-192411
+Node: DSA92580
+Node: Randomness103923
+Node: Ascii encoding119027
+Node: Miscellaneous functions125477
+Node: Compatibility functions125985
+Node: Nettle soup127230
+Node: Installation128223
+Node: Index128918
 
 End Tag Table
 
 
 Local Variables:
-coding: iso-8859-1
+coding: utf-8
 End:

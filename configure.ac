@@ -2,7 +2,7 @@ dnl -*- mode: shell-script; sh-indentation: 2; -*-
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([nettle], [2.4], [nettle-bugs@lists.lysator.liu.se])
+AC_INIT([nettle], [2.5], [nettle-bugs@lists.lysator.liu.se])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR([arcfour.c])
 # Needed to stop autoconf from looking for files in parent directories.
@@ -11,10 +11,10 @@ AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_HEADER([config.h])
 
 LIBNETTLE_MAJOR=4
-LIBNETTLE_MINOR=3
+LIBNETTLE_MINOR=4
 
 LIBHOGWEED_MAJOR=2
-LIBHOGWEED_MINOR=1
+LIBHOGWEED_MINOR=2
 
 AC_CANONICAL_HOST
 
@@ -44,8 +44,8 @@ AC_ARG_ENABLE(assembler,
   [enable_assembler=yes])
 
 AC_ARG_ENABLE(shared,
-  AC_HELP_STRING([--enable-shared], [Build a shared library]),,
-  [enable_shared=no])
+  AC_HELP_STRING([--disable-shared], [Do not build any shared library]),,
+  [enable_shared=yes])
 
 AC_ARG_ENABLE(pic,
   AC_HELP_STRING([--disable-pic],
@@ -106,6 +106,8 @@ AC_PROG_INSTALL
 # According to the autoconf manual, needs install-sh from
 # autoconf-2.60 or automake-1.10 to avoid races.
 AC_PROG_MKDIR_P
+
+AC_PROG_LN_S
 
 LSH_DEPENDENCY_TRACKING
 
@@ -231,7 +233,7 @@ if test "x$enable_assembler" = xyes ; then
     found=no
     for tmp_f in aes-encrypt-internal.asm aes-decrypt-internal.asm \
 		 arcfour-crypt.asm camellia-crypt-internal.asm \
-		 md5-compress.asm memxor.asm \
+		 md5-compress.asm memxor.asm salsa20-crypt.asm \
 		 serpent-encrypt.asm serpent-decrypt.asm \
 		 sha1-compress.asm machine.m4; do
 #       echo "Looking for $srcdir/$asm_path/$tmp_f"
@@ -252,52 +254,66 @@ LSH_CCPIC
 
 SHLIBCFLAGS="$CCPIC"
 
-IF_WIN32='#'
-IF_NOT_WIN32=''
+IF_DLL='#'
+LIBNETTLE_FILE_SRC='$(LIBNETTLE_FORLINK)'
+LIBHOGWEED_FILE_SRC='$(LIBHOGWEED_FORLINK)'
+EMULATOR=''
+W64_ABI=no
 
 case "$host_os" in
-  mingw32*)
-    IF_WIN32=''
-    IF_NOT_WIN32='#'
-    LIBNETTLE_FORLINK='libnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
+  mingw32*|cygwin*)
+    # The actual DLLs, e.g. libnettle-$major-$minor.dll, are normally
+    # installed into the bin dir (or more exactly $libdir/../bin, for
+    # automake), while libnettle.dll.a, which is a stub file for
+    # linking to the DLL, is installed into the lib dir.
+    case "$host_os" in
+      mingw32*)
+        LIBNETTLE_FORLINK='libnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
+        LIBHOGWEED_FORLINK='libhogweed-$(LIBHOGWEED_MAJOR)-$(LIBHOGWEED_MINOR).dll'
+        ;;
+      cygwin*)
+        LIBNETTLE_FORLINK='cygnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
+        LIBHOGWEED_FORLINK='cyghogweed-$(LIBHOGWEED_MAJOR)-$(LIBHOGWEED_MINOR).dll'
+        ;;
+    esac
+    if test "x$cross_compiling" = xyes ; then
+	case "$ABI" in
+	    64)
+		EMULATOR=wine64
+		;;
+	    *)
+		EMULATOR=wine
+		;;
+	esac
+    fi
+    if test "x$ABI" = x64 ; then
+        W64_ABI=yes
+    fi
     LIBNETTLE_SONAME=''
     LIBNETTLE_FILE='libnettle.dll.a'
+    LIBNETTLE_FILE_SRC='$(LIBNETTLE_FILE)'
     LIBNETTLE_LINK='$(CC) $(LDFLAGS) -shared -Wl,--out-implib=$(LIBNETTLE_FILE) -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive'
     LIBNETTLE_LIBS='-Wl,--no-whole-archive $(LIBS)'
 
-    LIBHOGWEED_FORLINK='libhogweed-$(LIBHOGWEED_MAJOR)-$(LIBHOGWEED_MINOR).dll'
     LIBHOGWEED_SONAME=''
     LIBHOGWEED_FILE='libhogweed.dll.a'
+    LIBHOGWEED_FILE_SRC='$(LIBHOGWEED_FILE)'
     LIBHOGWEED_LINK='$(CC) $(LDFLAGS) -shared -Wl,--out-implib=$(LIBHOGWEED_FILE) -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive'
     LIBHOGWEED_LIBS='-Wl,--no-whole-archive $(LIBS) libnettle.dll.a'
-    ;;
-  cygwin*)
-    IF_WIN32=''
-    IF_NOT_WIN32='#'
-    LIBNETTLE_FORLINK='cygnettle-$(LIBNETTLE_MAJOR)-$(LIBNETTLE_MINOR).dll'
-    LIBNETTLE_SONAME=''
-    LIBNETTLE_FILE='libnettle.dll.a'
-    LIBNETTLE_LINK='$(CC) $(LDFLAGS) -shared -Wl,--out-implib=$(LIBNETTLE_FILE) -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive'
-    LIBNETTLE_LIBS='-Wl,--no-whole-archive $(LIBS)'
-
-    LIBHOGWEED_FORLINK='cyghogweed-$(LIBHOGWEED_MAJOR)-$(LIBHOGWEED_MINOR).dll'
-    LIBHOGWEED_SONAME=''
-    LIBHOGWEED_FILE='libhogweed.dll.a'
-    LIBHOGWEED_LINK='$(CC) $(LDFLAGS) -shared -Wl,--out-implib=$(LIBHOGWEED_FILE) -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive'
-    LIBHOGWEED_LIBS='-Wl,--no-whole-archive $(LIBS)'
+    IF_DLL=''
     ;;
   darwin*)
-    LIBNETTLE_FORLINK='libnettle.dylib'
+    LIBNETTLE_FORLINK=libnettle.dylib
     LIBNETTLE_SONAME='libnettle.$(LIBNETTLE_MAJOR).dylib'
     LIBNETTLE_FILE='libnettle.$(LIBNETTLE_MAJOR).$(LIBNETTLE_MINOR).dylib'
-    LIBNETTLE_LINK='$(CC) -dynamiclib $(LDFLAGS)'
+    LIBNETTLE_LINK='$(CC) -dynamiclib $(LDFLAGS) -install_name ${libdir}/$(LIBNETTLE_SONAME) -compatibility_version $(LIBNETTLE_MAJOR) -current_version $(LIBNETTLE_MAJOR).$(LIBNETTLE_MINOR)'
     LIBNETTLE_LIBS=''
 
     LIBHOGWEED_FORLINK=libhogweed.dylib
     LIBHOGWEED_SONAME='libhogweed.$(LIBHOGWEED_MAJOR).dylib'
     LIBHOGWEED_FILE='libhogweed.$(LIBHOGWEED_MAJOR).$(LIBHOGWEED_MINOR).dylib'
-    LIBHOGWEED_LINK='$(CC) -dynamiclib -L. $(LDFLAGS)'
-    LIBHOGWEED_LIBS='$(LIBS) $(LIBNETTLE_FORLINK)'
+    LIBHOGWEED_LINK='$(CC) -dynamiclib -L. $(LDFLAGS) -install_name ${libdir}/$(LIBHOGWEED_SONAME) -compatibility_version $(LIBHOGWEED_MAJOR) -current_version $(LIBHOGWEED_MAJOR).$(LIBHOGWEED_MINOR)'
+    LIBHOGWEED_LIBS='-lnettle -lgmp'
     ;;
   solaris*)
     # Sun's ld uses -h to set the soname, and this option is passed
@@ -334,9 +350,6 @@ case "$host_os" in
     LIBHOGWEED_LIBS='-lnettle -lgmp'
     ;;
 esac
-
-AC_SUBST([IF_WIN32])
-AC_SUBST([IF_NOT_WIN32])
 
 if test "x$enable_pic" = xyes; then
   CCPIC_MAYBE="$CCPIC"
@@ -449,6 +462,8 @@ AC_SUBST(ASM_ELF_STYLE)
 AC_SUBST(ASM_TYPE_FUNCTION)
 AC_SUBST(ASM_MARK_NOEXEC_STACK)
 AC_SUBST(ASM_ALIGN_LOG)
+AC_SUBST(W64_ABI)
+AC_SUBST(EMULATOR)
 
 AC_SUBST(SHLIBCFLAGS)
 
@@ -457,6 +472,7 @@ AC_SUBST(LIBNETTLE_MINOR)
 AC_SUBST(LIBNETTLE_FORLINK)
 AC_SUBST(LIBNETTLE_SONAME)
 AC_SUBST(LIBNETTLE_FILE)
+AC_SUBST(LIBNETTLE_FILE_SRC)
 AC_SUBST(LIBNETTLE_LINK)
 AC_SUBST(LIBNETTLE_LIBS)
 
@@ -465,6 +481,7 @@ AC_SUBST(LIBHOGWEED_MINOR)
 AC_SUBST(LIBHOGWEED_FORLINK)
 AC_SUBST(LIBHOGWEED_SONAME)
 AC_SUBST(LIBHOGWEED_FILE)
+AC_SUBST(LIBHOGWEED_FILE_SRC)
 AC_SUBST(LIBHOGWEED_LINK)
 AC_SUBST(LIBHOGWEED_LIBS)
 
@@ -481,6 +498,10 @@ AC_TYPE_UID_T
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_CHECK_SIZEOF(long)
+AC_CHECK_ALIGNOF(uint64_t)
+
+ALIGNOF_UINT64_T="$ac_cv_alignof_uint64_t"
+AC_SUBST(ALIGNOF_UINT64_T)
 
 AC_CHECK_HEADERS([openssl/blowfish.h openssl/des.h openssl/cast.h openssl/aes.h],,
 [enable_openssl=no
@@ -553,6 +574,7 @@ fi
 
 AC_SUBST(IF_HOGWEED)
 AC_SUBST(IF_SHARED)
+AC_SUBST(IF_DLL)
 
 OPENSSL_LIBFLAGS=''
 
@@ -564,7 +586,7 @@ if test x$enable_openssl = xyes ; then
 fi
 
 AH_TEMPLATE([WITH_OPENSSL],
-	    [Define if you have openssl's libcrypto (used for benchmarking)])
+	    [Define if you have openssl's libcrypto (used for benchmarking)]) dnl'
 
 if test x$enable_openssl = xyes ; then
   AC_DEFINE(WITH_OPENSSL)
@@ -572,10 +594,13 @@ fi
 
 AC_SUBST(OPENSSL_LIBFLAGS)
 
-# Choose strategy for Camellia round
 AH_BOTTOM(
-[/* Needs include of <limits.h> before use. */
-#define HAVE_NATIVE_64_BIT (SIZEOF_LONG * CHAR_BIT >= 64)
+[#if defined(__x86_64__) || defined(__arch64__)
+# define HAVE_NATIVE_64_BIT 1
+#else
+/* Needs include of <limits.h> before use. */
+# define HAVE_NATIVE_64_BIT (SIZEOF_LONG * CHAR_BIT >= 64)
+#endif
 ])
 
 # clock_gettime is in librt on *-*-osf5.1 and on glibc, so add -lrt to
@@ -585,7 +610,7 @@ AH_BOTTOM(
 
 old_LIBS="$LIBS"
 AC_SEARCH_LIBS(clock_gettime, rt, [
-  AC_DEFINE([HAVE_CLOCK_GETTIME],1,[Define to 1 if you have the `clock_gettime' function])])
+  AC_DEFINE([HAVE_CLOCK_GETTIME],1,[Define if clock_gettime is available])])
 BENCH_LIBS="$LIBS"
 LIBS="$old_LIBS"
 

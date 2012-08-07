@@ -1,6 +1,6 @@
 C nettle, low-level cryptographics library
 C 
-C Copyright (C) 2004, 2008 Niels Möller
+C Copyright (C) 2004, 2008 Niels MÃ¶ller
 C  
 C The nettle library is free software; you can redistribute it and/or modify
 C it under the terms of the GNU Lesser General Public License as published by
@@ -126,6 +126,7 @@ C adding, and then rotating back.
 	ALIGN(4)
 PROLOGUE(_nettle_sha1_compress)
 	C save all registers that need to be saved
+	W64_ENTRY(2, 0)
 	
 	sub	$68, %rsp	C  %rsp = W
 
@@ -250,5 +251,6 @@ PROLOGUE(_nettle_sha1_compress)
 	addl	SE, 16(STATE)
 
 	add	$68, %rsp
+	W64_EXIT(2, 0)
 	ret
 EPILOGUE(_nettle_sha1_compress)

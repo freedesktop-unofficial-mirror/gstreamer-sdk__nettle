@@ -2,7 +2,7 @@
 
 /* nettle, low-level cryptographics library
  *
- * Copyright (C) 2005 Niels Möller
+ * Copyright (C) 2005 Niels MÃ¶ller
  *  
  * The nettle library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +22,9 @@
 
 #ifndef NETTLE_TYPES_H
 #define NETTLE_TYPES_H
+
+/* Pretend these types always exists. Nettle doesn't use them. */
+#define _STDINT_HAVE_INT_FAST32_T 1
 
 #include "nettle-stdint.h"
 

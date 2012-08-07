@@ -5,7 +5,7 @@
 
 /* nettle, low-level cryptographics library
  *
- * Copyright (C) 2001, 2002 Niels Möller
+ * Copyright (C) 2001, 2002 Niels MÃ¶ller
  *  
  * The nettle library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -32,9 +32,6 @@
 #include "md5.h"
 #include "sha.h"
 
-/* For nettle_random_func */
-#include "nettle-meta.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,6 +43,9 @@ extern "C" {
 #define rsa_private_key_init nettle_rsa_private_key_init
 #define rsa_private_key_clear nettle_rsa_private_key_clear
 #define rsa_private_key_prepare nettle_rsa_private_key_prepare
+#define rsa_pkcs1_verify nettle_rsa_pkcs1_verify
+#define rsa_pkcs1_sign nettle_rsa_pkcs1_sign
+#define rsa_pkcs1_sign_tr nettle_rsa_pkcs1_sign_tr
 #define rsa_md5_sign nettle_rsa_md5_sign
 #define rsa_md5_verify nettle_rsa_md5_verify
 #define rsa_sha1_sign nettle_rsa_sha1_sign
@@ -64,6 +64,7 @@ extern "C" {
 #define rsa_sha512_verify_digest nettle_rsa_sha512_verify_digest
 #define rsa_encrypt nettle_rsa_encrypt
 #define rsa_decrypt nettle_rsa_decrypt
+#define rsa_decrypt_tr nettle_rsa_decrypt_tr
 #define rsa_compute_root nettle_rsa_compute_root
 #define rsa_generate_keypair nettle_rsa_generate_keypair
 #define rsa_keypair_to_sexp nettle_rsa_keypair_to_sexp
@@ -75,6 +76,8 @@ extern "C" {
 #define rsa_keypair_to_openpgp nettle_rsa_keypair_to_openpgp
 #define _rsa_verify _nettle_rsa_verify
 #define _rsa_check_size _nettle_rsa_check_size
+#define _rsa_blind _nettle_rsa_blind
+#define _rsa_unblind _nettle_rsa_unblind
 
 /* This limit is somewhat arbitrary. Technically, the smallest modulo
    which makes sense at all is 15 = 3*5, phi(15) = 8, size 4 bits. But
@@ -169,6 +172,22 @@ rsa_private_key_prepare(struct rsa_private_key *key);
 
 /* PKCS#1 style signatures */
 int
+rsa_pkcs1_sign(const struct rsa_private_key *key,
+	       unsigned length, const uint8_t *digest_info,
+	       mpz_t s);
+
+int
+rsa_pkcs1_sign_tr(const struct rsa_public_key *pub,
+  	          const struct rsa_private_key *key,
+	          void *random_ctx, nettle_random_func *random,
+	          unsigned length, const uint8_t *digest_info,
+   	          mpz_t s);
+int
+rsa_pkcs1_verify(const struct rsa_public_key *key,
+		 unsigned length, const uint8_t *digest_info,
+		 const mpz_t signature);
+
+int
 rsa_md5_sign(const struct rsa_private_key *key,
              struct md5_ctx *hash,
              mpz_t signature);
@@ -260,7 +279,7 @@ rsa_sha512_verify_digest(const struct rsa_public_key *key,
 int
 rsa_encrypt(const struct rsa_public_key *key,
 	    /* For padding */
-	    void *random_ctx, nettle_random_func random,
+	    void *random_ctx, nettle_random_func *random,
 	    unsigned length, const uint8_t *cleartext,
 	    mpz_t cipher);
 
@@ -273,6 +292,14 @@ int
 rsa_decrypt(const struct rsa_private_key *key,
 	    unsigned *length, uint8_t *cleartext,
 	    const mpz_t ciphertext);
+
+/* Timing-resistant version, using randomized RSA blinding. */
+int
+rsa_decrypt_tr(const struct rsa_public_key *pub,
+	       const struct rsa_private_key *key,
+	       void *random_ctx, nettle_random_func *random,	       
+	       unsigned *length, uint8_t *message,
+	       const mpz_t gibberish);
 
 /* Compute x, the e:th root of m. Calling it with x == m is allowed. */
 void
@@ -287,8 +314,8 @@ int
 rsa_generate_keypair(struct rsa_public_key *pub,
 		     struct rsa_private_key *key,
 
-		     void *random_ctx, nettle_random_func random,
-		     void *progress_ctx, nettle_progress_func progress,
+		     void *random_ctx, nettle_random_func *random,
+		     void *progress_ctx, nettle_progress_func *progress,
 
 		     /* Desired size of modulo, in bits */
 		     unsigned n_size,
@@ -376,6 +403,13 @@ _rsa_verify(const struct rsa_public_key *key,
 
 unsigned
 _rsa_check_size(mpz_t n);
+
+void
+_rsa_blind (const struct rsa_public_key *pub,
+	    void *random_ctx, nettle_random_func *random,
+	    mpz_t c, mpz_t ri);
+void
+_rsa_unblind (const struct rsa_public_key *pub, mpz_t c, const mpz_t ri);
 
 #ifdef __cplusplus
 }

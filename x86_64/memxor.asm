@@ -28,7 +28,9 @@ define(<TMP2>, <%r9>)
 define(<CNT>, <%rdi>)
 define(<S0>, <%r11>)
 define(<S1>, <%rdi>) C Overlaps with CNT 
-	
+
+define(<USE_SSE2>, <no>)
+
 	.file "memxor.asm"
 
 	.text
@@ -38,6 +40,7 @@ define(<S1>, <%rdi>) C Overlaps with CNT
 	ALIGN(4)
 
 PROLOGUE(memxor)
+	W64_ENTRY(3, 0)
 	mov	%rdx, %r10
 	mov	%rdi, %rdx
 	jmp 	.Lmemxor3_entry
@@ -48,6 +51,7 @@ EPILOGUE(memxor)
 	ALIGN(4)
 	
 PROLOGUE(memxor3)
+	W64_ENTRY(4, 0)
 	C %cl needed for shift count, so move away N
 	mov	%rcx, N
 .Lmemxor3_entry:
@@ -78,6 +82,10 @@ PROLOGUE(memxor3)
 	jnz	.Lalign_loop
 
 .Laligned:
+ifelse(USE_SSE2, yes, <
+	cmp	$16, N
+	jnc	.Lsse2_case
+>)
 	C Check for the case that AP and BP have the same alignment,
 	C but different from DST.
 	mov	AP, TMP
@@ -194,6 +202,8 @@ C 	jz	.Ldone
 	xor	(BP, N), TMP
 	mov	TMP, (DST, N)
 
+	C ENTRY might have been 3 args, too, but it doesn't matter for the exit
+	W64_EXIT(4, 0)
 	ret
 
 .Lfinal:
@@ -208,5 +218,45 @@ C 	jz	.Ldone
 	jnc	.Lfinal_loop
 
 .Ldone:
+	C ENTRY might have been 3 args, too, but it doesn't matter for the exit
+	W64_EXIT(4, 0)
 	ret
+
+ifelse(USE_SSE2, yes, <
+
+.Lsse2_case:
+	lea	(DST, N), TMP
+	test	$8, TMP
+	jz	.Lsse2_next
+	sub	$8, N
+	mov	(AP, N), TMP
+	xor	(BP, N), TMP
+	mov	TMP, (DST, N)
+	jmp	.Lsse2_next
+
+	ALIGN(4)
+.Lsse2_loop:
+	movdqu	(AP, N), %xmm0
+	movdqu	(BP, N), %xmm1
+	pxor	%xmm0, %xmm1
+	movdqa	%xmm1, (DST, N)
+.Lsse2_next:
+	sub	$16, N
+	ja	.Lsse2_loop
+	
+	C FIXME: See if we can do a full word first, before the
+	C byte-wise final loop.
+	jnz	.Lfinal		
+
+	C Final operation is aligned
+	movdqu	(AP), %xmm0
+	movdqu	(BP), %xmm1
+	pxor	%xmm0, %xmm1
+	movdqa	%xmm1, (DST)
+	C ENTRY might have been 3 args, too, but it doesn't matter for the exit
+	W64_EXIT(4, 0)
+	ret
+>)	
+	
+
 EPILOGUE(memxor3)

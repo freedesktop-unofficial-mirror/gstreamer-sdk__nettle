@@ -1,16 +1,16 @@
 <html lang="en">
 <head>
 <title>Nettle: a low-level cryptographic library</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="description" content="Nettle: a low-level cryptographic library">
 <meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This manual is for the Nettle library (version 2.3), a
+This manual is for the Nettle library (version 2.5), a
 low-level cryptographic library.
 
-Originally written 2001 by Niels Möller, updated 2011.
+Originally written 2001 by Niels MÃ¶ller, updated 2011.
 
      This manual is placed in the public domain. You may freely copy
      it, in whole or in part, with or without modification. Attribution
@@ -65,9 +65,10 @@ Originally written 2001 by Niels Möller, updated 2011.
 <li><a href="#Cipher-functions">6.2.6 CAST128</a>
 <li><a href="#Cipher-functions">6.2.7 DES</a>
 <li><a href="#Cipher-functions">6.2.8 DES3</a>
-<li><a href="#Cipher-functions">6.2.9 SERPENT</a>
-<li><a href="#Cipher-functions">6.2.10 TWOFISH</a>
-<li><a href="#Cipher-functions">6.2.11 <code>struct nettle_cipher</code></a>
+<li><a href="#Cipher-functions">6.2.9 Salsa20</a>
+<li><a href="#Cipher-functions">6.2.10 SERPENT</a>
+<li><a href="#Cipher-functions">6.2.11 TWOFISH</a>
+<li><a href="#Cipher-functions">6.2.12 <code>struct nettle_cipher</code></a>
 </li></ul>
 <li><a href="#Cipher-modes">6.3 Cipher modes</a>
 <ul>
@@ -103,8 +104,9 @@ Originally written 2001 by Niels Möller, updated 2011.
 <ul>
 <li><a href="#Randomness">6.6.1 Yarrow</a>
 </li></ul>
-<li><a href="#Miscellaneous-functions">6.7 Miscellaneous functions</a>
-<li><a href="#Compatibility-functions">6.8 Compatibility functions</a>
+<li><a href="#Ascii-encoding">6.7 Ascii encoding</a>
+<li><a href="#Miscellaneous-functions">6.8 Miscellaneous functions</a>
+<li><a href="#Compatibility-functions">6.9 Compatibility functions</a>
 </li></ul>
 <li><a name="toc_Nettle-soup" href="#Nettle-soup">7 Traditional Nettle Soup</a>
 <li><a name="toc_Installation" href="#Installation">8 Installation</a>
@@ -130,10 +132,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 can use the library directly from your C programs, or write or use an
 object-oriented wrapper for your favorite language or application.
 
-   <p>This manual is for the Nettle library (version 2.3), a
+   <p>This manual is for the Nettle library (version 2.5), a
 low-level cryptographic library.
 
-   <p>Originally written 2001 by Niels Möller, updated 2011.
+   <p>Originally written 2001 by Niels MÃ¶ller, updated 2011.
 
    <blockquote>
 This manual is placed in the public domain. You may freely copy it, in
@@ -165,6 +167,7 @@ appreciated, but not required.
 <li><a href="#Keyed-hash-functions">Keyed hash functions</a>
 <li><a href="#Public_002dkey-algorithms">Public-key algorithms</a>
 <li><a href="#Randomness">Randomness</a>
+<li><a href="#Ascii-encoding">Ascii encoding</a>
 <li><a href="#Miscellaneous-functions">Miscellaneous functions</a>
 <li><a href="#Compatibility-functions">Compatibility functions</a>
 
@@ -254,11 +257,11 @@ course appreciated, but it is not required.
      <dl>
 <dt><em>AES</em><dd>The implementation of the AES cipher (also known as rijndael) is written
 by Rafael Sevilla. Assembler for x86 by Rafael Sevilla and
-Niels Möller, Sparc assembler by Niels Möller. Released under the
+Niels MÃ¶ller, Sparc assembler by Niels MÃ¶ller. Released under the
 LGPL.
 
      <br><dt><em>ARCFOUR</em><dd>The implementation of the ARCFOUR (also known as RC4) cipher is written
-by Niels Möller. Released under the LGPL.
+by Niels MÃ¶ller. Released under the LGPL.
 
      <br><dt><em>ARCTWO</em><dd>The implementation of the ARCTWO (also known as RC2) cipher is written
 by Nikos Mavroyanopoulos and modified by Werner Koch and Simon
@@ -266,11 +269,11 @@ Josefsson. Released under the LGPL.
 
      <br><dt><em>BLOWFISH</em><dd>The implementation of the BLOWFISH cipher is written by Werner Koch,
 copyright owned by the Free Software Foundation. Also hacked by Simon
-Josefsson and Niels Möller. Released under the LGPL.
+Josefsson and Niels MÃ¶ller. Released under the LGPL.
 
      <br><dt><em>CAMELLIA</em><dd>The C implementation is by Nippon Telegraph and Telephone Corporation
-(NTT), heavily modified by Niels Möller. Assembler for x86 and x86_64
-by Niels Möller. Released under the LGPL.
+(NTT), heavily modified by Niels MÃ¶ller. Assembler for x86 and x86_64
+by Niels MÃ¶ller. Released under the LGPL.
 
      <br><dt><em>CAST128</em><dd>The implementation of the CAST128 cipher is written by Steve Reid. 
 Released into the public domain.
@@ -279,40 +282,45 @@ Released into the public domain.
 released under the LGPL.
 
      <br><dt><em>MD2</em><dd>The implementation of MD2 is written by Andrew Kuchling, and hacked
-some by Andreas Sigfridsson and Niels Möller. Python Cryptography
+some by Andreas Sigfridsson and Niels MÃ¶ller. Python Cryptography
 Toolkit license (essentially public domain).
 
      <br><dt><em>MD4</em><dd>This is almost the same code as for MD5 below, with modifications by
 Marcus Comstedt. Released into the public domain.
 
      <br><dt><em>MD5</em><dd>The implementation of the MD5 message digest is written by Colin Plumb. 
-It has been hacked some more by Andrew Kuchling and Niels Möller. 
+It has been hacked some more by Andrew Kuchling and Niels MÃ¶ller. 
 Released into the public domain.
 
      <br><dt><em>RIPMED160</em><dd>The implementation of RIPEMD160 message digest is based on the code in
 libgcrypt, copyright owned by the Free Software Foundation. Ported to
 Nettle by Andres Mejia. Released under the LGPL.
 
+     <br><dt><em>SALSA20</em><dd>The C implementation of SALSA20 is based on D. J. Bernstein's reference
+implementation (in the public domain), adapted to Nettle by Simon
+Josefsson, and heavily modified by Niels MÃ¶ller. Assembly for x86_64 by
+Niels MÃ¶ller. Released under the LGPL.
+
      <br><dt><em>SERPENT</em><dd>The implementation of the SERPENT cipher is based on the code in libgcrypt,
 copyright owned by the Free Software Foundation. Adapted to Nettle by
-Simon Josefsson and heavily modified by Niels Möller. Assembly for
-x86_64 by Niels Möller. Released under the LGPL.
+Simon Josefsson and heavily modified by Niels MÃ¶ller. Assembly for
+x86_64 by Niels MÃ¶ller. Released under the LGPL.
 
      <br><dt><em>SHA1</em><dd>The C implementation of the SHA1 message digest is written by Peter
-Gutmann, and hacked some more by Andrew Kuchling and Niels Möller. 
-Released into the public domain. Assembler for x86 by Niels Möller,
+Gutmann, and hacked some more by Andrew Kuchling and Niels MÃ¶ller. 
+Released into the public domain. Assembler for x86 by Niels MÃ¶ller,
 released under the LGPL.
 
-     <br><dt><em>SHA224, SHA256, SHA384, and SHA512</em><dd>Written by Niels Möller, using Peter Gutmann's SHA1 code as a model. 
+     <br><dt><em>SHA224, SHA256, SHA384, and SHA512</em><dd>Written by Niels MÃ¶ller, using Peter Gutmann's SHA1 code as a model. 
 Released under the LGPL.
 
      <br><dt><em>TWOFISH</em><dd>The implementation of the TWOFISH cipher is written by Ruud de Rooij. 
 Released under the LGPL.
 
-     <br><dt><em>RSA</em><dd>Written by Niels Möller, released under the LGPL. Uses the GMP library
+     <br><dt><em>RSA</em><dd>Written by Niels MÃ¶ller, released under the LGPL. Uses the GMP library
 for bignum operations.
 
-     <br><dt><em>DSA</em><dd>Written by Niels Möller, released under the LGPL. Uses the GMP library
+     <br><dt><em>DSA</em><dd>Written by Niels MÃ¶ller, released under the LGPL. Uses the GMP library
 for bignum operations. 
 </dl>
 
@@ -473,8 +481,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a accesskey="4" href="#Keyed-hash-functions">Keyed hash functions</a>
 <li><a accesskey="5" href="#Public_002dkey-algorithms">Public-key algorithms</a>
 <li><a accesskey="6" href="#Randomness">Randomness</a>
-<li><a accesskey="7" href="#Miscellaneous-functions">Miscellaneous functions</a>
-<li><a accesskey="8" href="#Compatibility-functions">Compatibility functions</a>
+<li><a accesskey="7" href="#Ascii-encoding">Ascii encoding</a>
+<li><a accesskey="8" href="#Miscellaneous-functions">Miscellaneous functions</a>
+<li><a accesskey="9" href="#Compatibility-functions">Compatibility functions</a>
 </ul>
 
 <div class="node">
@@ -1539,7 +1548,84 @@ in any other way.
 <blockquote><p>Analogous to <code>des_encrypt</code>
 </p></blockquote></div>
 
-<h4 class="subsection">6.2.9 SERPENT</h4>
+<h4 class="subsection">6.2.9 Salsa20</h4>
+
+<p>Salsa20 is a fairly recent stream cipher designed by D. J. Bernstein. It
+is built on the observation that a cryptographic hash function can be
+used for encryption: Form the hash input from the secret key and a
+counter, xor the hash output and the first block of the plaintext, then
+increment the counter to process the next block (similar to CTR mode, see
+see <a href="#CTR">CTR</a>). Bernstein defined an encryption algorithm, Snuffle,
+in this way to ridicule United States export restrictions which treated hash
+functions as nice and harmless, but ciphers as dangerous munitions.
+
+   <p>Salsa20 uses the same idea, but with a new specialized hash function to
+mix key, block counter, and a couple of constants (input and output are
+the same size, making it not directly applicable for use as a general
+hash function). It's also designed for speed; on x86_64, it is currently
+the fastest cipher offered by nettle. It uses a block size of 512 bits
+(64 octets) and there are two specified key sizes, 128 and 256 bits (16
+and 32 octets).
+
+   <p>When using Salsa20 to process a message, one specifies both a key and a
+<dfn>nonce</dfn>, the latter playing a similar rÃ´le to the initialization
+vector (<acronym>IV</acronym>) used with <acronym>CBC</acronym> or <acronym>CTR</acronym> mode. For
+this reason, Nettle uses the term <acronym>IV</acronym> to refer to the Salsa20
+nonce. One can use the same key for several messages, provided one uses
+a unique random <acronym>iv</acronym> for each message. The <acronym>iv</acronym> is 64
+bits (8 octets). The block counter is initialized to zero for each
+message, and is also 64 bits (8 octets). Nettle defines Salsa20 in
+<samp><span class="file">&lt;nettle/salsa20.h&gt;</span></samp>.
+
+<div class="defun">
+&mdash; Context struct: <b>struct salsa20_ctx</b><var><a name="index-struct-salsa20_005fctx-137"></a></var><br>
+        </div>
+
+<div class="defun">
+&mdash; Constant: <b>SALSA20_MIN_KEY_SIZE</b><var><a name="index-SALSA20_005fMIN_005fKEY_005fSIZE-138"></a></var><br>
+&mdash; Constant: <b>SALSA20_MAX_KEY_SIZE</b><var><a name="index-SALSA20_005fMAX_005fKEY_005fSIZE-139"></a></var><br>
+<blockquote><p>The two supported key sizes, 16 and 32 octets. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Constant: <b>SALSA20_KEY_SIZE</b><var><a name="index-SALSA20_005fKEY_005fSIZE-140"></a></var><br>
+<blockquote><p>Recommended key size, 32. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Constant: <b>SALSA20_BLOCK_SIZE</b><var><a name="index-SALSA20_005fBLOCK_005fSIZE-141"></a></var><br>
+<blockquote><p>Salsa20 block size, 64. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Constant: <b>SALSA20_IV_SIZE</b><var><a name="index-SALSA20_005fIV_005fSIZE-142"></a></var><br>
+<blockquote><p>Size of the <acronym>IV</acronym>, 8. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: void <b>salsa20_set_key</b> (<var>struct salsa20_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-salsa20_005fset_005fkey-143"></a></var><br>
+<blockquote><p>Initialize the cipher. The same function is used for both encryption and
+decryption. Before using the cipher, you <em>must</em> also call
+<code>salsa20_set_iv</code>, see below. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: void <b>salsa20_set_iv</b> (<var>struct salsa20_ctx *ctx, const uint8_t *iv</var>)<var><a name="index-salsa20_005fset_005fiv-144"></a></var><br>
+<blockquote><p>Sets the <acronym>IV</acronym>. It is always of size <code>SALSA20_IV_SIZE</code>, 8
+octets. This function also initializes the block counter, setting it to
+zero. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: void <b>salsa20_crypt</b> (<var>struct salsa20_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-salsa20_005fcrypt-145"></a></var><br>
+<blockquote><p>Encrypts or decrypts the data of a message, using salsa20. When a
+message is encrypted using a sequence of calls to <code>salsa20_crypt</code>,
+all but the last call <em>must</em> use a length that is a multiple of
+<code>SALSA20_BLOCK_SIZE</code>.
+
+        </blockquote></div>
+
+<h4 class="subsection">6.2.10 SERPENT</h4>
 
 <p>SERPENT is one of the AES finalists, designed by Ross Anderson, Eli
 Biham and Lars Knudsen. Thus, the interface and properties are similar
@@ -1548,37 +1634,37 @@ anything but the maximum key size, smaller keys are just padded to
 larger ones. Nettle defines SERPENT in <samp><span class="file">&lt;nettle/serpent.h&gt;</span></samp>.
 
 <div class="defun">
-&mdash; Context struct: <b>struct serpent_ctx</b><var><a name="index-struct-serpent_005fctx-137"></a></var><br>
+&mdash; Context struct: <b>struct serpent_ctx</b><var><a name="index-struct-serpent_005fctx-146"></a></var><br>
         </div>
 
 <div class="defun">
-&mdash; Constant: <b>SERPENT_BLOCK_SIZE</b><var><a name="index-SERPENT_005fBLOCK_005fSIZE-138"></a></var><br>
+&mdash; Constant: <b>SERPENT_BLOCK_SIZE</b><var><a name="index-SERPENT_005fBLOCK_005fSIZE-147"></a></var><br>
 <blockquote><p>The SERPENT block-size, 16
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>SERPENT_MIN_KEY_SIZE</b><var><a name="index-SERPENT_005fMIN_005fKEY_005fSIZE-139"></a></var><br>
+&mdash; Constant: <b>SERPENT_MIN_KEY_SIZE</b><var><a name="index-SERPENT_005fMIN_005fKEY_005fSIZE-148"></a></var><br>
 <blockquote><p>Minimum SERPENT key size, 16
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>SERPENT_MAX_KEY_SIZE</b><var><a name="index-SERPENT_005fMAX_005fKEY_005fSIZE-140"></a></var><br>
+&mdash; Constant: <b>SERPENT_MAX_KEY_SIZE</b><var><a name="index-SERPENT_005fMAX_005fKEY_005fSIZE-149"></a></var><br>
 <blockquote><p>Maximum SERPENT key size, 32
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>SERPENT_KEY_SIZE</b><var><a name="index-SERPENT_005fKEY_005fSIZE-141"></a></var><br>
+&mdash; Constant: <b>SERPENT_KEY_SIZE</b><var><a name="index-SERPENT_005fKEY_005fSIZE-150"></a></var><br>
 <blockquote><p>Default SERPENT key size, 32
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>serpent_set_key</b> (<var>struct serpent_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-serpent_005fset_005fkey-142"></a></var><br>
+&mdash; Function: void <b>serpent_set_key</b> (<var>struct serpent_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-serpent_005fset_005fkey-151"></a></var><br>
 <blockquote><p>Initialize the cipher. The same function is used for both encryption and
 decryption. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>serpent_encrypt</b> (<var>struct serpent_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-serpent_005fencrypt-143"></a></var><br>
+&mdash; Function: void <b>serpent_encrypt</b> (<var>struct serpent_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-serpent_005fencrypt-152"></a></var><br>
 <blockquote><p>Encryption function. <var>length</var> must be an integral multiple of the
 block size. If it is more than one block, the data is processed in ECB
 mode. <code>src</code> and <code>dst</code> may be equal, but they must not overlap
@@ -1586,47 +1672,47 @@ in any other way.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>serpent_decrypt</b> (<var>struct serpent_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-serpent_005fdecrypt-144"></a></var><br>
+&mdash; Function: void <b>serpent_decrypt</b> (<var>struct serpent_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-serpent_005fdecrypt-153"></a></var><br>
 <blockquote><p>Analogous to <code>serpent_encrypt</code>
 </p></blockquote></div>
 
-<h4 class="subsection">6.2.10 TWOFISH</h4>
+<h4 class="subsection">6.2.11 TWOFISH</h4>
 
 <p>Another AES finalist, this one designed by Bruce Schneier and others. 
 Nettle defines it in <samp><span class="file">&lt;nettle/twofish.h&gt;</span></samp>.
 
 <div class="defun">
-&mdash; Context struct: <b>struct twofish_ctx</b><var><a name="index-struct-twofish_005fctx-145"></a></var><br>
+&mdash; Context struct: <b>struct twofish_ctx</b><var><a name="index-struct-twofish_005fctx-154"></a></var><br>
         </div>
 
 <div class="defun">
-&mdash; Constant: <b>TWOFISH_BLOCK_SIZE</b><var><a name="index-TWOFISH_005fBLOCK_005fSIZE-146"></a></var><br>
+&mdash; Constant: <b>TWOFISH_BLOCK_SIZE</b><var><a name="index-TWOFISH_005fBLOCK_005fSIZE-155"></a></var><br>
 <blockquote><p>The TWOFISH block-size, 16
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>TWOFISH_MIN_KEY_SIZE</b><var><a name="index-TWOFISH_005fMIN_005fKEY_005fSIZE-147"></a></var><br>
+&mdash; Constant: <b>TWOFISH_MIN_KEY_SIZE</b><var><a name="index-TWOFISH_005fMIN_005fKEY_005fSIZE-156"></a></var><br>
 <blockquote><p>Minimum TWOFISH key size, 16
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>TWOFISH_MAX_KEY_SIZE</b><var><a name="index-TWOFISH_005fMAX_005fKEY_005fSIZE-148"></a></var><br>
+&mdash; Constant: <b>TWOFISH_MAX_KEY_SIZE</b><var><a name="index-TWOFISH_005fMAX_005fKEY_005fSIZE-157"></a></var><br>
 <blockquote><p>Maximum TWOFISH key size, 32
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>TWOFISH_KEY_SIZE</b><var><a name="index-TWOFISH_005fKEY_005fSIZE-149"></a></var><br>
+&mdash; Constant: <b>TWOFISH_KEY_SIZE</b><var><a name="index-TWOFISH_005fKEY_005fSIZE-158"></a></var><br>
 <blockquote><p>Default TWOFISH key size, 32
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>twofish_set_key</b> (<var>struct twofish_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-twofish_005fset_005fkey-150"></a></var><br>
+&mdash; Function: void <b>twofish_set_key</b> (<var>struct twofish_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-twofish_005fset_005fkey-159"></a></var><br>
 <blockquote><p>Initialize the cipher. The same function is used for both encryption and
 decryption. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>twofish_encrypt</b> (<var>struct twofish_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-twofish_005fencrypt-151"></a></var><br>
+&mdash; Function: void <b>twofish_encrypt</b> (<var>struct twofish_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-twofish_005fencrypt-160"></a></var><br>
 <blockquote><p>Encryption function. <var>length</var> must be an integral multiple of the
 block size. If it is more than one block, the data is processed in ECB
 mode. <code>src</code> and <code>dst</code> may be equal, but they must not overlap
@@ -1634,13 +1720,13 @@ in any other way.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>twofish_decrypt</b> (<var>struct twofish_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-twofish_005fdecrypt-152"></a></var><br>
+&mdash; Function: void <b>twofish_decrypt</b> (<var>struct twofish_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-twofish_005fdecrypt-161"></a></var><br>
 <blockquote><p>Analogous to <code>twofish_encrypt</code>
 </p></blockquote></div>
 
 <!-- @node nettle_cipher, Cipher Block Chaining, Cipher functions, Reference -->
 <!-- @comment  node-name,  next,  previous,  up -->
-<h4 class="subsection">6.2.11 <code>struct nettle_cipher</code></h4>
+<h4 class="subsection">6.2.12 <code>struct nettle_cipher</code></h4>
 
 <p>Nettle includes a struct including information about some of the more
 regular cipher functions. It should be considered a little experimental,
@@ -1649,7 +1735,7 @@ various algorithms. Nettle defines these structs in
 <samp><span class="file">&lt;nettle/nettle-meta.h&gt;</span></samp>.
 
 <div class="defun">
-&mdash; Meta struct: <code>struct nettle_cipher</code><var> name context_size block_size key_size set_encrypt_key set_decrypt_key encrypt decrypt<a name="index-g_t_0040code_007bstruct-nettle_005fcipher_007d-153"></a></var><br>
+&mdash; Meta struct: <code>struct nettle_cipher</code><var> name context_size block_size key_size set_encrypt_key set_decrypt_key encrypt decrypt<a name="index-g_t_0040code_007bstruct-nettle_005fcipher_007d-162"></a></var><br>
 <blockquote><p>The last four attributes are function pointers, of types
 <code>nettle_set_key_func</code> and <code>nettle_crypt_func</code>. The first
 argument to these functions is a <code>void *</code> pointer to a context
@@ -1657,30 +1743,30 @@ struct, which is of size <code>context_size</code>.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes128</b><var><a name="index-nettle_005faes128-154"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes192</b><var><a name="index-nettle_005faes192-155"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes256</b><var><a name="index-nettle_005faes256-156"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes128</b><var><a name="index-nettle_005faes128-163"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes192</b><var><a name="index-nettle_005faes192-164"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_aes256</b><var><a name="index-nettle_005faes256-165"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo40;</b><var><a name="index-nettle_005farctwo40_003b-157"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo64;</b><var><a name="index-nettle_005farctwo64_003b-158"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo128;</b><var><a name="index-nettle_005farctwo128_003b-159"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo_gutmann128;</b><var><a name="index-nettle_005farctwo_005fgutmann128_003b-160"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo40;</b><var><a name="index-nettle_005farctwo40_003b-166"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo64;</b><var><a name="index-nettle_005farctwo64_003b-167"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo128;</b><var><a name="index-nettle_005farctwo128_003b-168"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_arctwo_gutmann128;</b><var><a name="index-nettle_005farctwo_005fgutmann128_003b-169"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_arcfour128</b><var><a name="index-nettle_005farcfour128-161"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_arcfour128</b><var><a name="index-nettle_005farcfour128-170"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia128</b><var><a name="index-nettle_005fcamellia128-162"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia192</b><var><a name="index-nettle_005fcamellia192-163"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia256</b><var><a name="index-nettle_005fcamellia256-164"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia128</b><var><a name="index-nettle_005fcamellia128-171"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia192</b><var><a name="index-nettle_005fcamellia192-172"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_camellia256</b><var><a name="index-nettle_005fcamellia256-173"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_cast128</b><var><a name="index-nettle_005fcast128-165"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_cast128</b><var><a name="index-nettle_005fcast128-174"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent128</b><var><a name="index-nettle_005fserpent128-166"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent192</b><var><a name="index-nettle_005fserpent192-167"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent256</b><var><a name="index-nettle_005fserpent256-168"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent128</b><var><a name="index-nettle_005fserpent128-175"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent192</b><var><a name="index-nettle_005fserpent192-176"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_serpent256</b><var><a name="index-nettle_005fserpent256-177"></a></var><br>
 
-   &mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish128</b><var><a name="index-nettle_005ftwofish128-169"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish192</b><var><a name="index-nettle_005ftwofish192-170"></a></var><br>
-&mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish256</b><var><a name="index-nettle_005ftwofish256-171"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish128</b><var><a name="index-nettle_005ftwofish128-178"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish192</b><var><a name="index-nettle_005ftwofish192-179"></a></var><br>
+&mdash; Constant Struct: struct nettle_cipher <b>nettle_twofish256</b><var><a name="index-nettle_005ftwofish256-180"></a></var><br>
 <blockquote>
         <p>Nettle includes such structs for all the <em>regular</em> ciphers, i.e. 
 ones without weak keys or other oddities.
@@ -1689,7 +1775,7 @@ ones without weak keys or other oddities.
 other oddities.  This list can be used to dynamically enumerate or
 search the supported algorithms:
 
-   &mdash; Constant Struct: struct nettle_cipher ** <b>nettle_ciphers</b><var><a name="index-nettle_005fciphers-172"></a></var><br>
+   &mdash; Constant Struct: struct nettle_cipher ** <b>nettle_ciphers</b><var><a name="index-nettle_005fciphers-181"></a></var><br>
 
         </div>
 
@@ -1738,7 +1824,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cipher-modes">Cipher modes</a>
 <!-- node-name,  next,  previous,  up -->
 <h4 class="subsection">6.3.1 Cipher Block Chaining</h4>
 
-<p><a name="index-Cipher-Block-Chaining-173"></a><a name="index-CBC-Mode-174"></a>
+<p><a name="index-Cipher-Block-Chaining-182"></a><a name="index-CBC-Mode-183"></a>
 When using <acronym>CBC</acronym> mode, plaintext blocks are not encrypted
 independently of each other, like in Electronic Cook Book mode. Instead,
 when encrypting a block in <acronym>CBC</acronym> mode, the previous ciphertext
@@ -1766,8 +1852,8 @@ decryption. These functions uses <code>void *</code> to pass cipher contexts
 around.
 
 <div class="defun">
-&mdash; Function: void <b>cbc_encrypt</b> (<var>void *ctx, nettle_crypt_func f, unsigned block_size, uint8_t *iv, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-cbc_005fencrypt-175"></a></var><br>
-&mdash; Function: void <b>cbc_decrypt</b> (<var>void *ctx, void </var>(<var>*f</var>)()<var>, unsigned block_size, uint8_t *iv, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-cbc_005fdecrypt-176"></a></var><br>
+&mdash; Function: void <b>cbc_encrypt</b> (<var>void *ctx, nettle_crypt_func f, unsigned block_size, uint8_t *iv, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-cbc_005fencrypt-184"></a></var><br>
+&mdash; Function: void <b>cbc_decrypt</b> (<var>void *ctx, void </var>(<var>*f</var>)()<var>, unsigned block_size, uint8_t *iv, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-cbc_005fdecrypt-185"></a></var><br>
 <blockquote>
         <p>Applies the encryption or decryption function <var>f</var> in <acronym>CBC</acronym>
 mode. The final ciphertext block processed is copied into <var>iv</var>
@@ -1784,7 +1870,7 @@ argument <var>ctx</var> on to <var>f</var>.
    <p>There are also some macros to help use these functions correctly.
 
 <div class="defun">
-&mdash; Macro: <b>CBC_CTX</b> (<var>context_type, block_size</var>)<var><a name="index-CBC_005fCTX-177"></a></var><br>
+&mdash; Macro: <b>CBC_CTX</b> (<var>context_type, block_size</var>)<var><a name="index-CBC_005fCTX-186"></a></var><br>
 <blockquote><p>Expands to
      <pre class="example">          {
              context_type ctx;
@@ -1802,15 +1888,15 @@ argument <var>ctx</var> on to <var>f</var>.
 <pre class="example">     struct aes_cbc_ctx CBC_CTX (struct aes_ctx, AES_BLOCK_SIZE);
 </pre>
    <div class="defun">
-&mdash; Macro: <b>CBC_SET_IV</b> (<var>ctx, iv</var>)<var><a name="index-CBC_005fSET_005fIV-178"></a></var><br>
+&mdash; Macro: <b>CBC_SET_IV</b> (<var>ctx, iv</var>)<var><a name="index-CBC_005fSET_005fIV-187"></a></var><br>
 <blockquote><p>First argument is a pointer to a context struct as defined by <code>CBC_CTX</code>,
 and the second is a pointer to an Initialization Vector (IV) that is
 copied into that context. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>CBC_ENCRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CBC_005fENCRYPT-179"></a></var><br>
-&mdash; Macro: <b>CBC_DECRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CBC_005fDECRYPT-180"></a></var><br>
+&mdash; Macro: <b>CBC_ENCRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CBC_005fENCRYPT-188"></a></var><br>
+&mdash; Macro: <b>CBC_DECRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CBC_005fDECRYPT-189"></a></var><br>
 <blockquote><p>A simpler way to invoke <code>cbc_encrypt</code> and <code>cbc_decrypt</code>. The
 first argument is a pointer to a context struct as defined by
 <code>CBC_CTX</code>, and the second argument is an encryption or decryption
@@ -1834,7 +1920,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cipher-modes">Cipher modes</a>
 <!-- node-name,  next,  previous,  up -->
 <h4 class="subsection">6.3.2 Counter mode</h4>
 
-<p><a name="index-Counter-Mode-181"></a><a name="index-CTR-Mode-182"></a>
+<p><a name="index-Counter-Mode-190"></a><a name="index-CTR-Mode-191"></a>
 Counter mode (<acronym>CTR</acronym>) uses the block cipher as a keyed
 pseudo-random generator. The output of the generator is XORed with the
 data to be encrypted. It can be understood as a way to transform a block
@@ -1859,13 +1945,13 @@ transformed into <code>n</code> ciphertext blocks <code>C_1</code>,<small class=
      C_n = E_k(IC + n - 1) [1..m] XOR M_n
 </pre>
    <p>The <acronym>IC</acronym> is the initial value for the counter, it plays a
-similar role as the <acronym>IV</acronym> for <acronym>CBC</acronym>. When adding,
+similar rÃ´le as the <acronym>IV</acronym> for <acronym>CBC</acronym>. When adding,
 <code>IC + x</code>, <acronym>IC</acronym> is interpreted as an integer, in network
 byte order. For the last block, <code>E_k(IC + n - 1) [1..m]</code> means that
 the cipher output is truncated to <code>m</code> bytes.
 
 <div class="defun">
-&mdash; Function: void <b>ctr_crypt</b> (<var>void *ctx, nettle_crypt_func f, unsigned block_size, uint8_t *ctr, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-ctr_005fcrypt-183"></a></var><br>
+&mdash; Function: void <b>ctr_crypt</b> (<var>void *ctx, nettle_crypt_func f, unsigned block_size, uint8_t *ctr, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-ctr_005fcrypt-192"></a></var><br>
 <blockquote>
         <p>Applies the encryption function <var>f</var> in <acronym>CTR</acronym> mode. Note that
 for <acronym>CTR</acronym> mode, encryption and decryption is the same operation,
@@ -1880,7 +1966,7 @@ a multiple of the block size.
    <p>Like for <acronym>CBC</acronym>, there are also a couple of helper macros.
 
 <div class="defun">
-&mdash; Macro: <b>CTR_CTX</b> (<var>context_type, block_size</var>)<var><a name="index-CTR_005fCTX-184"></a></var><br>
+&mdash; Macro: <b>CTR_CTX</b> (<var>context_type, block_size</var>)<var><a name="index-CTR_005fCTX-193"></a></var><br>
 <blockquote><p>Expands to
      <pre class="example">          {
              context_type ctx;
@@ -1890,14 +1976,14 @@ a multiple of the block size.
         </blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>CTR_SET_COUNTER</b> (<var>ctx, iv</var>)<var><a name="index-CTR_005fSET_005fCOUNTER-185"></a></var><br>
+&mdash; Macro: <b>CTR_SET_COUNTER</b> (<var>ctx, iv</var>)<var><a name="index-CTR_005fSET_005fCOUNTER-194"></a></var><br>
 <blockquote><p>First argument is a pointer to a context struct as defined by
 <code>CTR_CTX</code>, and the second is a pointer to an initial counter that
 is copied into that context. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>CTR_CRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CTR_005fCRYPT-186"></a></var><br>
+&mdash; Macro: <b>CTR_CRYPT</b> (<var>ctx, f, length, dst, src</var>)<var><a name="index-CTR_005fCRYPT-195"></a></var><br>
 <blockquote><p>A simpler way to invoke <code>ctr_crypt</code>. The first argument is a
 pointer to a context struct as defined by <code>CTR_CTX</code>, and the second
 argument is an encryption function following Nettle's conventions. The
@@ -1916,7 +2002,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cipher-modes">Cipher modes</a>
 <!-- node-name,  next,  previous,  up -->
 <h4 class="subsection">6.3.3 Galois counter mode</h4>
 
-<p><a name="index-Galois-Counter-Mode-187"></a><a name="index-GCM-188"></a>
+<p><a name="index-Galois-Counter-Mode-196"></a><a name="index-GCM-197"></a>
 Galois counter mode is the combination of counter mode with message
 authentication based on universal hashing. The main objective of the
 design is to provide high performance for hardware implementations,
@@ -1947,41 +2033,41 @@ underlying cipher. These interfaces are defined in <samp><span class="file">&lt;
 <h5 class="subsubsection">6.3.3.1 General <acronym>GCM</acronym> interface</h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct gcm_key</b><var><a name="index-struct-gcm_005fkey-189"></a></var><br>
+&mdash; Context struct: <b>struct gcm_key</b><var><a name="index-struct-gcm_005fkey-198"></a></var><br>
 <blockquote><p>Message independent hash subkey, and related tables. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Context struct: <b>struct gcm_ctx</b><var><a name="index-struct-gcm_005fctx-190"></a></var><br>
+&mdash; Context struct: <b>struct gcm_ctx</b><var><a name="index-struct-gcm_005fctx-199"></a></var><br>
 <blockquote><p>Holds state corresponding to a particular message. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>GCM_BLOCK_SIZE</b><var><a name="index-GCM_005fBLOCK_005fSIZE-191"></a></var><br>
+&mdash; Constant: <b>GCM_BLOCK_SIZE</b><var><a name="index-GCM_005fBLOCK_005fSIZE-200"></a></var><br>
 <blockquote><p><acronym>GCM</acronym>'s block size, 16. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>GCM_IV_SIZE</b><var><a name="index-GCM_005fIV_005fSIZE-192"></a></var><br>
+&mdash; Constant: <b>GCM_IV_SIZE</b><var><a name="index-GCM_005fIV_005fSIZE-201"></a></var><br>
 <blockquote><p>Recommended size of the <acronym>IV</acronym>, 12. Other sizes are allowed. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_set_key</b> (<var>struct gcm_key *key, void *cipher, nettle_crypt_func *f</var>)<var><a name="index-gcm_005fset_005fkey-193"></a></var><br>
+&mdash; Function: void <b>gcm_set_key</b> (<var>struct gcm_key *key, void *cipher, nettle_crypt_func *f</var>)<var><a name="index-gcm_005fset_005fkey-202"></a></var><br>
 <blockquote><p>Initializes <var>key</var>. <var>cipher</var> gives a context struct for the
 underlying cipher, which must have been previously initialized for
 encryption, and <var>f</var> is the encryption function. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_set_iv</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, unsigned length, const uint8_t *iv</var>)<var><a name="index-gcm_005fset_005fiv-194"></a></var><br>
+&mdash; Function: void <b>gcm_set_iv</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, unsigned length, const uint8_t *iv</var>)<var><a name="index-gcm_005fset_005fiv-203"></a></var><br>
 <blockquote><p>Initializes <var>ctx</var> using the given <acronym>IV</acronym>. The <var>key</var>
 argument is actually needed only if <var>length</var> differs from
 <code>GCM_IV_SIZE</code>. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_update</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, unsigned length, const uint8_t *data</var>)<var><a name="index-gcm_005fupdate-195"></a></var><br>
+&mdash; Function: void <b>gcm_update</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, unsigned length, const uint8_t *data</var>)<var><a name="index-gcm_005fupdate-204"></a></var><br>
 <blockquote><p>Provides associated data to be authenticated. If used, must be called
 before <code>gcm_encrypt</code> or <code>gcm_decrypt</code>. All but the last call
 for each message <em>must</em> use a length that is a multiple of the
@@ -1989,8 +2075,8 @@ block size.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_encrypt</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005fencrypt-196"></a></var><br>
-&mdash; Function: void <b>gcm_decrypt</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005fdecrypt-197"></a></var><br>
+&mdash; Function: void <b>gcm_encrypt</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005fencrypt-205"></a></var><br>
+&mdash; Function: void <b>gcm_decrypt</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005fdecrypt-206"></a></var><br>
 <blockquote><p>Encrypts or decrypts the data of a message. <var>cipher</var> is the context
 struct for the underlying cipher and <var>f</var> is the encryption function. 
 All but the last call for each message <em>must</em> use a length that is
@@ -1998,7 +2084,7 @@ a multiple of the block size.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_digest</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *digest</var>)<var><a name="index-gcm_005fdigest-198"></a></var><br>
+&mdash; Function: void <b>gcm_digest</b> (<var>struct gcm_ctx *ctx, const struct gcm_key *key, void *cipher, nettle_crypt_func *f, unsigned length, uint8_t *digest</var>)<var><a name="index-gcm_005fdigest-207"></a></var><br>
 <blockquote><p>Extracts the message digest (also known &ldquo;authentication tag&rdquo;). This is
 the final operation when processing a message. <var>length</var> is usually
 equal to <code>GCM_BLOCK_SIZE</code>, but if you provide a smaller value,
@@ -2020,7 +2106,7 @@ call <code>gcm_set_iv</code> with a new <acronym>iv</acronym>.
 <p>The following macros are defined.
 
 <div class="defun">
-&mdash; Macro: <b>GCM_CTX</b> (<var>context_type</var>)<var><a name="index-GCM_005fCTX-199"></a></var><br>
+&mdash; Macro: <b>GCM_CTX</b> (<var>context_type</var>)<var><a name="index-GCM_005fCTX-208"></a></var><br>
 <blockquote><p>This defines an all-in-one context struct, including the context of the
 underlying cipher, the hash subkey, and the per-message state. It expands
 to
@@ -2038,7 +2124,7 @@ to
    <p>The following macros operate on context structs of this form.
 
 <div class="defun">
-&mdash; Macro: <b>GCM_SET_KEY</b> (<var>ctx, set_key, encrypt, length, data</var>)<var><a name="index-GCM_005fSET_005fKEY-200"></a></var><br>
+&mdash; Macro: <b>GCM_SET_KEY</b> (<var>ctx, set_key, encrypt, length, data</var>)<var><a name="index-GCM_005fSET_005fKEY-209"></a></var><br>
 <blockquote><p>First argument, <var>ctx</var>, is a context struct as defined
 by <code>GCM_CTX</code>. <var>set_key</var> and <var>encrypt</var> are functions for
 setting the encryption key and for encrypting data using the underlying
@@ -2046,22 +2132,22 @@ cipher. <var>length</var> and <var>data</var> give the key.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>GCM_SET_IV</b> (<var>ctx, length, data</var>)<var><a name="index-GCM_005fSET_005fIV-201"></a></var><br>
+&mdash; Macro: <b>GCM_SET_IV</b> (<var>ctx, length, data</var>)<var><a name="index-GCM_005fSET_005fIV-210"></a></var><br>
 <blockquote><p>First argument is a context struct as defined by
 <code>GCM_CTX</code>. <var>length</var> and <var>data</var> give the initialization
 vector (<acronym>IV</acronym>). 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>GCM_UPDATE</b> (<var>ctx, length, data</var>)<var><a name="index-GCM_005fUPDATE-202"></a></var><br>
+&mdash; Macro: <b>GCM_UPDATE</b> (<var>ctx, length, data</var>)<var><a name="index-GCM_005fUPDATE-211"></a></var><br>
 <blockquote><p>Simpler way to call <code>gcm_update</code>. First argument is a context
 struct as defined by <code>GCM_CTX</code>
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>GCM_ENCRYPT</b> (<var>ctx, encrypt, length, dst, src</var>)<var><a name="index-GCM_005fENCRYPT-203"></a></var><br>
-&mdash; Macro: <b>GCM_DECRYPT</b> (<var>ctx, encrypt, length, dst, src</var>)<var><a name="index-GCM_005fDECRYPT-204"></a></var><br>
-&mdash; Macro: <b>GCM_DIGEST</b> (<var>ctx, encrypt, length, digest</var>)<var><a name="index-GCM_005fDIGEST-205"></a></var><br>
+&mdash; Macro: <b>GCM_ENCRYPT</b> (<var>ctx, encrypt, length, dst, src</var>)<var><a name="index-GCM_005fENCRYPT-212"></a></var><br>
+&mdash; Macro: <b>GCM_DECRYPT</b> (<var>ctx, encrypt, length, dst, src</var>)<var><a name="index-GCM_005fDECRYPT-213"></a></var><br>
+&mdash; Macro: <b>GCM_DIGEST</b> (<var>ctx, encrypt, length, digest</var>)<var><a name="index-GCM_005fDIGEST-214"></a></var><br>
 <blockquote><p>Simpler way to call <code>gcm_encrypt</code>, <code>gcm_decrypt</code> or
 <code>gcm_digest</code>. First argument is a context struct as defined by
 <code>GCM_CTX</code>. Second argument, <var>encrypt</var>, is a pointer to the
@@ -2074,23 +2160,23 @@ encryption function of the underlying cipher.
 <acronym>AES</acronym> as the underlying cipher.
 
 <div class="defun">
-&mdash; Context struct: <b>struct gcm_aes_ctx</b><var><a name="index-struct-gcm_005faes_005fctx-206"></a></var><br>
+&mdash; Context struct: <b>struct gcm_aes_ctx</b><var><a name="index-struct-gcm_005faes_005fctx-215"></a></var><br>
 <blockquote><p>The context struct, defined using <code>GCM_CTX</code>. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_aes_set_key</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-gcm_005faes_005fset_005fkey-207"></a></var><br>
+&mdash; Function: void <b>gcm_aes_set_key</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *key</var>)<var><a name="index-gcm_005faes_005fset_005fkey-216"></a></var><br>
 <blockquote><p>Initializes <var>ctx</var> using the given key. All valid <acronym>AES</acronym> key
 sizes can be used. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_aes_set_iv</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *iv</var>)<var><a name="index-gcm_005faes_005fset_005fiv-208"></a></var><br>
+&mdash; Function: void <b>gcm_aes_set_iv</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *iv</var>)<var><a name="index-gcm_005faes_005fset_005fiv-217"></a></var><br>
 <blockquote><p>Initializes the per-message state, using the given <acronym>IV</acronym>. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_aes_update</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-gcm_005faes_005fupdate-209"></a></var><br>
+&mdash; Function: void <b>gcm_aes_update</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-gcm_005faes_005fupdate-218"></a></var><br>
 <blockquote><p>Provides associated data to be authenticated. If used, must be called
 before <code>gcm_aes_encrypt</code> or <code>gcm_aes_decrypt</code>. All but the last call
 for each message <em>must</em> use a length that is a multiple of the
@@ -2098,8 +2184,8 @@ block size.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_aes_encrypt</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005faes_005fencrypt-210"></a></var><br>
-&mdash; Function: void <b>gcm_aes_decrypt</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005faes_005fdecrypt-211"></a></var><br>
+&mdash; Function: void <b>gcm_aes_encrypt</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005faes_005fencrypt-219"></a></var><br>
+&mdash; Function: void <b>gcm_aes_decrypt</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *dst, const uint8_t *src</var>)<var><a name="index-gcm_005faes_005fdecrypt-220"></a></var><br>
 <blockquote><p>Encrypts or decrypts the data of a message. All but the last call for
 each message <em>must</em> use a length that is a multiple of the block
 size.
@@ -2107,7 +2193,7 @@ size.
         </blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>gcm_aes_digest</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-gcm_005faes_005fdigest-212"></a></var><br>
+&mdash; Function: void <b>gcm_aes_digest</b> (<var>struct gcm_aes_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-gcm_005faes_005fdigest-221"></a></var><br>
 <blockquote><p>Extracts the message digest (also known &ldquo;authentication tag&rdquo;). This is
 the final operation when processing a message. <var>length</var> is usually
 equal to <code>GCM_BLOCK_SIZE</code>, but if you provide a smaller value,
@@ -2126,7 +2212,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
 <!-- node-name,  next,  previous,  up -->
 <h3 class="section">6.4 Keyed Hash Functions</h3>
 
-<p><a name="index-Keyed-Hash-Function-213"></a><a name="index-Message-Authentication-Code-214"></a><a name="index-MAC-215"></a>
+<p><a name="index-Keyed-Hash-Function-222"></a><a name="index-Message-Authentication-Code-223"></a><a name="index-MAC-224"></a>
 A <dfn>keyed hash function</dfn>, or <dfn>Message Authentication Code</dfn>
 (<acronym>MAC</acronym>) is a function that takes a key and a message, and
 produces fixed size <acronym>MAC</acronym>. It should be hard to compute a
@@ -2184,7 +2270,7 @@ function. There are also concrete functions for <acronym>HMAC-MD5</acronym>,
 <acronym>HMAC-SHA512</acronym>. First, the abstract functions:
 
 <div class="defun">
-&mdash; Function: void <b>hmac_set_key</b> (<var>void *outer, void *inner, void *state, const struct nettle_hash *H, unsigned length, const uint8_t *key</var>)<var><a name="index-hmac_005fset_005fkey-216"></a></var><br>
+&mdash; Function: void <b>hmac_set_key</b> (<var>void *outer, void *inner, void *state, const struct nettle_hash *H, unsigned length, const uint8_t *key</var>)<var><a name="index-hmac_005fset_005fkey-225"></a></var><br>
 <blockquote><p>Initializes the three context structs from the key. The <var>outer</var> and
 <var>inner</var> contexts corresponds to the subkeys <code>k_o</code> and
 <code>k_i</code>. <var>state</var> is used for hashing the message, and is
@@ -2192,7 +2278,7 @@ initialized as a copy of the <var>inner</var> context.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_update</b> (<var>void *state, const struct nettle_hash *H, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fupdate-217"></a></var><br>
+&mdash; Function: void <b>hmac_update</b> (<var>void *state, const struct nettle_hash *H, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fupdate-226"></a></var><br>
 <blockquote><p>This function is called zero or more times to process the message. 
 Actually, <code>hmac_update(state, H, length, data)</code> is equivalent to
 <code>H-&gt;update(state, length, data)</code>, so if you wish you can use the
@@ -2200,7 +2286,7 @@ ordinary update function of the underlying hash function instead.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_digest</b> (<var>const void *outer, const void *inner, void *state, const struct nettle_hash *H, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fdigest-218"></a></var><br>
+&mdash; Function: void <b>hmac_digest</b> (<var>const void *outer, const void *inner, void *state, const struct nettle_hash *H, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fdigest-227"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym> of the message, writing it to <var>digest</var>. 
 <var>outer</var> and <var>inner</var> are not modified. <var>length</var> is usually
 equal to <code>H-&gt;digest_size</code>, but if you provide a smaller value,
@@ -2214,7 +2300,7 @@ over processing a new message (with the same key).
 functions correctly.
 
 <div class="defun">
-&mdash; Macro: <b>HMAC_CTX</b> (<var>type</var>)<var><a name="index-HMAC_005fCTX-219"></a></var><br>
+&mdash; Macro: <b>HMAC_CTX</b> (<var>type</var>)<var><a name="index-HMAC_005fCTX-228"></a></var><br>
 <blockquote><p>Expands to
      <pre class="example">          {
              type outer;
@@ -2234,7 +2320,7 @@ directly,
 <pre class="example">     struct hmac_md5_ctx HMAC_CTX (struct md5_ctx);
 </pre>
    <div class="defun">
-&mdash; Macro: <b>HMAC_SET_KEY</b> (<var>ctx, H, length, key</var>)<var><a name="index-HMAC_005fSET_005fKEY-220"></a></var><br>
+&mdash; Macro: <b>HMAC_SET_KEY</b> (<var>ctx, H, length, key</var>)<var><a name="index-HMAC_005fSET_005fKEY-229"></a></var><br>
 <blockquote><p><var>ctx</var> is a pointer to a context struct as defined by
 <code>HMAC_CTX</code>, <var>H</var> is a pointer to a <code>const struct
 nettle_hash</code> describing the underlying hash function (so it must match
@@ -2243,7 +2329,7 @@ the secret key.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Macro: <b>HMAC_DIGEST</b> (<var>ctx, H, length, digest</var>)<var><a name="index-HMAC_005fDIGEST-221"></a></var><br>
+&mdash; Macro: <b>HMAC_DIGEST</b> (<var>ctx, H, length, digest</var>)<var><a name="index-HMAC_005fDIGEST-230"></a></var><br>
 <blockquote><p><var>ctx</var> is a pointer to a context struct as defined by
 <code>HMAC_CTX</code>, <var>H</var> is a pointer to a <code>const struct
 nettle_hash</code> describing the underlying hash function. The last two
@@ -2262,21 +2348,21 @@ easier to use than the general <acronym>HMAC</acronym> functions.
 <h5 class="subsubsection">6.4.2.1 <acronym>HMAC-MD5</acronym></h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct hmac_md5_ctx</b><var><a name="index-struct-hmac_005fmd5_005fctx-222"></a></var><br>
+&mdash; Context struct: <b>struct hmac_md5_ctx</b><var><a name="index-struct-hmac_005fmd5_005fctx-231"></a></var><br>
      </div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_md5_set_key</b> (<var>struct hmac_md5_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fmd5_005fset_005fkey-223"></a></var><br>
+&mdash; Function: void <b>hmac_md5_set_key</b> (<var>struct hmac_md5_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fmd5_005fset_005fkey-232"></a></var><br>
 <blockquote><p>Initializes the context with the key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_md5_update</b> (<var>struct hmac_md5_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fmd5_005fupdate-224"></a></var><br>
+&mdash; Function: void <b>hmac_md5_update</b> (<var>struct hmac_md5_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fmd5_005fupdate-233"></a></var><br>
 <blockquote><p>Process some more data. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_md5_digest</b> (<var>struct hmac_md5_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fmd5_005fdigest-225"></a></var><br>
+&mdash; Function: void <b>hmac_md5_digest</b> (<var>struct hmac_md5_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fmd5_005fdigest-234"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym>, writing it to <var>digest</var>. <var>length</var> may be smaller than
 <code>MD5_DIGEST_SIZE</code>, in which case only the first <var>length</var>
 octets of the <acronym>MAC</acronym> are written.
@@ -2288,21 +2374,21 @@ the same key.
 <h5 class="subsubsection">6.4.2.2 <acronym>HMAC-RIPEMD160</acronym></h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct hmac_ripemd160_ctx</b><var><a name="index-struct-hmac_005fripemd160_005fctx-226"></a></var><br>
+&mdash; Context struct: <b>struct hmac_ripemd160_ctx</b><var><a name="index-struct-hmac_005fripemd160_005fctx-235"></a></var><br>
      </div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_ripemd160_set_key</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fripemd160_005fset_005fkey-227"></a></var><br>
+&mdash; Function: void <b>hmac_ripemd160_set_key</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fripemd160_005fset_005fkey-236"></a></var><br>
 <blockquote><p>Initializes the context with the key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_ripemd160_update</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fripemd160_005fupdate-228"></a></var><br>
+&mdash; Function: void <b>hmac_ripemd160_update</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fripemd160_005fupdate-237"></a></var><br>
 <blockquote><p>Process some more data. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_ripemd160_digest</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fripemd160_005fdigest-229"></a></var><br>
+&mdash; Function: void <b>hmac_ripemd160_digest</b> (<var>struct hmac_ripemd160_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fripemd160_005fdigest-238"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym>, writing it to <var>digest</var>. <var>length</var> may be smaller than
 <code>RIPEMD160_DIGEST_SIZE</code>, in which case only the first <var>length</var>
 octets of the <acronym>MAC</acronym> are written.
@@ -2314,21 +2400,21 @@ the same key.
 <h5 class="subsubsection">6.4.2.3 <acronym>HMAC-SHA1</acronym></h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct hmac_sha1_ctx</b><var><a name="index-struct-hmac_005fsha1_005fctx-230"></a></var><br>
+&mdash; Context struct: <b>struct hmac_sha1_ctx</b><var><a name="index-struct-hmac_005fsha1_005fctx-239"></a></var><br>
      </div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha1_set_key</b> (<var>struct hmac_sha1_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha1_005fset_005fkey-231"></a></var><br>
+&mdash; Function: void <b>hmac_sha1_set_key</b> (<var>struct hmac_sha1_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha1_005fset_005fkey-240"></a></var><br>
 <blockquote><p>Initializes the context with the key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha1_update</b> (<var>struct hmac_sha1_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha1_005fupdate-232"></a></var><br>
+&mdash; Function: void <b>hmac_sha1_update</b> (<var>struct hmac_sha1_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha1_005fupdate-241"></a></var><br>
 <blockquote><p>Process some more data. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha1_digest</b> (<var>struct hmac_sha1_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha1_005fdigest-233"></a></var><br>
+&mdash; Function: void <b>hmac_sha1_digest</b> (<var>struct hmac_sha1_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha1_005fdigest-242"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym>, writing it to <var>digest</var>. <var>length</var> may be smaller than
 <code>SHA1_DIGEST_SIZE</code>, in which case only the first <var>length</var>
 octets of the <acronym>MAC</acronym> are written.
@@ -2340,21 +2426,21 @@ the same key.
 <h5 class="subsubsection">6.4.2.4 <acronym>HMAC-SHA256</acronym></h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct hmac_sha256_ctx</b><var><a name="index-struct-hmac_005fsha256_005fctx-234"></a></var><br>
+&mdash; Context struct: <b>struct hmac_sha256_ctx</b><var><a name="index-struct-hmac_005fsha256_005fctx-243"></a></var><br>
      </div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha256_set_key</b> (<var>struct hmac_sha256_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha256_005fset_005fkey-235"></a></var><br>
+&mdash; Function: void <b>hmac_sha256_set_key</b> (<var>struct hmac_sha256_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha256_005fset_005fkey-244"></a></var><br>
 <blockquote><p>Initializes the context with the key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha256_update</b> (<var>struct hmac_sha256_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha256_005fupdate-236"></a></var><br>
+&mdash; Function: void <b>hmac_sha256_update</b> (<var>struct hmac_sha256_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha256_005fupdate-245"></a></var><br>
 <blockquote><p>Process some more data. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha256_digest</b> (<var>struct hmac_sha256_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha256_005fdigest-237"></a></var><br>
+&mdash; Function: void <b>hmac_sha256_digest</b> (<var>struct hmac_sha256_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha256_005fdigest-246"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym>, writing it to <var>digest</var>. <var>length</var> may be smaller than
 <code>SHA256_DIGEST_SIZE</code>, in which case only the first <var>length</var>
 octets of the <acronym>MAC</acronym> are written.
@@ -2366,21 +2452,21 @@ the same key.
 <h5 class="subsubsection">6.4.2.5 <acronym>HMAC-SHA512</acronym></h5>
 
 <div class="defun">
-&mdash; Context struct: <b>struct hmac_sha512_ctx</b><var><a name="index-struct-hmac_005fsha512_005fctx-238"></a></var><br>
+&mdash; Context struct: <b>struct hmac_sha512_ctx</b><var><a name="index-struct-hmac_005fsha512_005fctx-247"></a></var><br>
      </div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha512_set_key</b> (<var>struct hmac_sha512_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha512_005fset_005fkey-239"></a></var><br>
+&mdash; Function: void <b>hmac_sha512_set_key</b> (<var>struct hmac_sha512_ctx *ctx, unsigned key_length, const uint8_t *key</var>)<var><a name="index-hmac_005fsha512_005fset_005fkey-248"></a></var><br>
 <blockquote><p>Initializes the context with the key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha512_update</b> (<var>struct hmac_sha512_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha512_005fupdate-240"></a></var><br>
+&mdash; Function: void <b>hmac_sha512_update</b> (<var>struct hmac_sha512_ctx *ctx, unsigned length, const uint8_t *data</var>)<var><a name="index-hmac_005fsha512_005fupdate-249"></a></var><br>
 <blockquote><p>Process some more data. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>hmac_sha512_digest</b> (<var>struct hmac_sha512_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha512_005fdigest-241"></a></var><br>
+&mdash; Function: void <b>hmac_sha512_digest</b> (<var>struct hmac_sha512_ctx *ctx, unsigned length, uint8_t *digest</var>)<var><a name="index-hmac_005fsha512_005fdigest-250"></a></var><br>
 <blockquote><p>Extracts the <acronym>MAC</acronym>, writing it to <var>digest</var>. <var>length</var> may be smaller than
 <code>SHA512_DIGEST_SIZE</code>, in which case only the first <var>length</var>
 octets of the <acronym>MAC</acronym> are written.
@@ -2416,7 +2502,7 @@ secure way. And if there are many users or entities that need to
 communicate, each <em>pair</em> needs a shared secret key known by nobody
 else.
 
-   <p><a name="index-Public-Key-Cryptography-242"></a><a name="index-One_002dway-function-243"></a>
+   <p><a name="index-Public-Key-Cryptography-251"></a><a name="index-One_002dway-function-252"></a>
 Public-key cryptography uses trapdoor one-way functions. A
 <dfn>one-way function</dfn> is a function <code>F</code> such that it is easy to
 compute the value <code>F(x)</code> for any <code>x</code>, but given a value
@@ -2558,13 +2644,13 @@ computed, the operation returns true if and only if the result equals
 large numbers (of type <code>mpz_t</code>).
 
 <div class="defun">
-&mdash; Context struct: <b>rsa_public_key</b><var> size n e<a name="index-rsa_005fpublic_005fkey-244"></a></var><br>
+&mdash; Context struct: <b>rsa_public_key</b><var> size n e<a name="index-rsa_005fpublic_005fkey-253"></a></var><br>
 <blockquote><p><code>size</code> is the size, in octets, of the modulo, and is used internally. 
 <code>n</code> and <code>e</code> is the public key. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Context struct: <b>rsa_private_key</b><var> size d p q a b c<a name="index-rsa_005fprivate_005fkey-245"></a></var><br>
+&mdash; Context struct: <b>rsa_private_key</b><var> size d p q a b c<a name="index-rsa_005fprivate_005fkey-254"></a></var><br>
 <blockquote><p><code>size</code> is the size, in octets, of the modulo, and is used internally. 
 <code>d</code> is the secret exponent, but it is not actually used when
 signing. Instead, the factors <code>p</code> and <code>q</code>, and the parameters
@@ -2576,8 +2662,8 @@ signing. Instead, the factors <code>p</code> and <code>q</code>, and the paramet
    <p>Before use, these structs must be initialized by calling one of
 
 <div class="defun">
-&mdash; Function: void <b>rsa_public_key_init</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005finit-246"></a></var><br>
-&mdash; Function: void <b>rsa_private_key_init</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005finit-247"></a></var><br>
+&mdash; Function: void <b>rsa_public_key_init</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005finit-255"></a></var><br>
+&mdash; Function: void <b>rsa_private_key_init</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005finit-256"></a></var><br>
 <blockquote><p>Calls <code>mpz_init</code> on all numbers in the key struct. 
 </p></blockquote></div>
 
@@ -2585,8 +2671,8 @@ signing. Instead, the factors <code>p</code> and <code>q</code>, and the paramet
 deallocated by calling one of
 
 <div class="defun">
-&mdash; Function: void <b>rsa_public_key_clear</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005fclear-248"></a></var><br>
-&mdash; Function: void <b>rsa_private_key_clear</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005fclear-249"></a></var><br>
+&mdash; Function: void <b>rsa_public_key_clear</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005fclear-257"></a></var><br>
+&mdash; Function: void <b>rsa_private_key_clear</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005fclear-258"></a></var><br>
 <blockquote><p>Calls <code>mpz_clear</code> on all numbers in the key struct. 
 </p></blockquote></div>
 
@@ -2599,8 +2685,8 @@ See <a href="gmp.html#Custom-Allocation">GMP Allocation</a>.
    <p>When you have assigned values to the attributes of a key, you must call
 
 <div class="defun">
-&mdash; Function: int <b>rsa_public_key_prepare</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005fprepare-250"></a></var><br>
-&mdash; Function: int <b>rsa_private_key_prepare</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005fprepare-251"></a></var><br>
+&mdash; Function: int <b>rsa_public_key_prepare</b> (<var>struct rsa_public_key *pub</var>)<var><a name="index-rsa_005fpublic_005fkey_005fprepare-259"></a></var><br>
+&mdash; Function: int <b>rsa_private_key_prepare</b> (<var>struct rsa_private_key *key</var>)<var><a name="index-rsa_005fprivate_005fkey_005fprepare-260"></a></var><br>
 <blockquote><p>Computes the octet size of the key (stored in the <code>size</code> attribute,
 and may also do other basic sanity checks. Returns one if successful, or
 zero if the key can't be used, for instance if the modulo is smaller
@@ -2620,10 +2706,10 @@ time nor message size compared to using SHA256 and SHA512, respectively.
    <p>Creation and verification of signatures is done with the following functions:
 
 <div class="defun">
-&mdash; Function: int <b>rsa_md5_sign</b> (<var>const struct rsa_private_key *key, struct md5_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fsign-252"></a></var><br>
-&mdash; Function: int <b>rsa_sha1_sign</b> (<var>const struct rsa_private_key *key, struct sha1_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fsign-253"></a></var><br>
-&mdash; Function: int <b>rsa_sha256_sign</b> (<var>const struct rsa_private_key *key, struct sha256_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fsign-254"></a></var><br>
-&mdash; Function: int <b>rsa_sha512_sign</b> (<var>const struct rsa_private_key *key, struct sha512_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fsign-255"></a></var><br>
+&mdash; Function: int <b>rsa_md5_sign</b> (<var>const struct rsa_private_key *key, struct md5_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fsign-261"></a></var><br>
+&mdash; Function: int <b>rsa_sha1_sign</b> (<var>const struct rsa_private_key *key, struct sha1_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fsign-262"></a></var><br>
+&mdash; Function: int <b>rsa_sha256_sign</b> (<var>const struct rsa_private_key *key, struct sha256_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fsign-263"></a></var><br>
+&mdash; Function: int <b>rsa_sha512_sign</b> (<var>const struct rsa_private_key *key, struct sha512_ctx *hash, mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fsign-264"></a></var><br>
 <blockquote><p>The signature is stored in <var>signature</var> (which must have been
 <code>mpz_init</code>'ed earlier). The hash context is reset so that it can be
 used for new messages. Returns one on success, or zero on failure. 
@@ -2633,10 +2719,10 @@ it's not possible to create a signature using SHA512 and a 512-bit
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: int <b>rsa_md5_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fsign_005fdigest-256"></a></var><br>
-&mdash; Function: int <b>rsa_sha1_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha1_005fsign_005fdigest-257"></a></var><br>
-&mdash; Function: int <b>rsa_sha256_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha256_005fsign_005fdigest-258"></a></var><br>
-&mdash; Function: int <b>rsa_sha512_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha512_005fsign_005fdigest-259"></a></var><br>
+&mdash; Function: int <b>rsa_md5_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fsign_005fdigest-265"></a></var><br>
+&mdash; Function: int <b>rsa_sha1_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha1_005fsign_005fdigest-266"></a></var><br>
+&mdash; Function: int <b>rsa_sha256_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha256_005fsign_005fdigest-267"></a></var><br>
+&mdash; Function: int <b>rsa_sha512_sign_digest</b> (<var>const struct rsa_private_key *key, const uint8_t *digest, mpz_t signature</var>)<var>;<a name="index-rsa_005fsha512_005fsign_005fdigest-268"></a></var><br>
 <blockquote><p>Creates a signature from the given hash digest. <var>digest</var> should
 point to a digest of size <code>MD5_DIGEST_SIZE</code>,
 <code>SHA1_DIGEST_SIZE</code>, or <code>SHA256_DIGEST_SIZE</code>, respectively. The
@@ -2645,19 +2731,19 @@ signature is stored in <var>signature</var> (which must have been
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: int <b>rsa_md5_verify</b> (<var>const struct rsa_public_key *key, struct md5_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fverify-260"></a></var><br>
-&mdash; Function: int <b>rsa_sha1_verify</b> (<var>const struct rsa_public_key *key, struct sha1_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fverify-261"></a></var><br>
-&mdash; Function: int <b>rsa_sha256_verify</b> (<var>const struct rsa_public_key *key, struct sha256_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fverify-262"></a></var><br>
-&mdash; Function: int <b>rsa_sha512_verify</b> (<var>const struct rsa_public_key *key, struct sha512_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fverify-263"></a></var><br>
+&mdash; Function: int <b>rsa_md5_verify</b> (<var>const struct rsa_public_key *key, struct md5_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fverify-269"></a></var><br>
+&mdash; Function: int <b>rsa_sha1_verify</b> (<var>const struct rsa_public_key *key, struct sha1_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fverify-270"></a></var><br>
+&mdash; Function: int <b>rsa_sha256_verify</b> (<var>const struct rsa_public_key *key, struct sha256_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fverify-271"></a></var><br>
+&mdash; Function: int <b>rsa_sha512_verify</b> (<var>const struct rsa_public_key *key, struct sha512_ctx *hash, const mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fverify-272"></a></var><br>
 <blockquote><p>Returns 1 if the signature is valid, or 0 if it isn't. In either case,
 the hash context is reset so that it can be used for new messages. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: int <b>rsa_md5_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fverify_005fdigest-264"></a></var><br>
-&mdash; Function: int <b>rsa_sha1_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fverify_005fdigest-265"></a></var><br>
-&mdash; Function: int <b>rsa_sha256_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fverify_005fdigest-266"></a></var><br>
-&mdash; Function: int <b>rsa_sha512_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fverify_005fdigest-267"></a></var><br>
+&mdash; Function: int <b>rsa_md5_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fmd5_005fverify_005fdigest-273"></a></var><br>
+&mdash; Function: int <b>rsa_sha1_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha1_005fverify_005fdigest-274"></a></var><br>
+&mdash; Function: int <b>rsa_sha256_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha256_005fverify_005fdigest-275"></a></var><br>
+&mdash; Function: int <b>rsa_sha512_verify_digest</b> (<var>const struct rsa_public_key *key, const uint8_t *digest, const mpz_t signature</var>)<var><a name="index-rsa_005fsha512_005fverify_005fdigest-276"></a></var><br>
 <blockquote><p>Returns 1 if the signature is valid, or 0 if it isn't. <var>digest</var> should
 point to a digest of size <code>MD5_DIGEST_SIZE</code>,
 <code>SHA1_DIGEST_SIZE</code>, or <code>SHA256_DIGEST_SIZE</code>, respectively. 
@@ -2669,14 +2755,14 @@ function that computes <code>x^d mod n</code> and nothing more, using the
 <acronym>CRT</acronym> optimization.
 
 <div class="defun">
-&mdash; Function: void <b>rsa_compute_root</b> (<var>struct rsa_private_key *key, mpz_t x, const mpz_t m</var>)<var><a name="index-rsa_005fcompute_005froot-268"></a></var><br>
+&mdash; Function: void <b>rsa_compute_root</b> (<var>struct rsa_private_key *key, mpz_t x, const mpz_t m</var>)<var><a name="index-rsa_005fcompute_005froot-277"></a></var><br>
 <blockquote><p>Computes <code>x = m^d</code>, efficiently. 
 </p></blockquote></div>
 
    <p>At last, how do you create new keys?
 
 <div class="defun">
-&mdash; Function: int <b>rsa_generate_keypair</b> (<var>struct rsa_public_key *pub, struct rsa_private_key *key, void *random_ctx, nettle_random_func random, void *progress_ctx, nettle_progress_func progress, unsigned n_size, unsigned e_size</var>)<var>;<a name="index-rsa_005fgenerate_005fkeypair-269"></a></var><br>
+&mdash; Function: int <b>rsa_generate_keypair</b> (<var>struct rsa_public_key *pub, struct rsa_private_key *key, void *random_ctx, nettle_random_func random, void *progress_ctx, nettle_progress_func progress, unsigned n_size, unsigned e_size</var>)<var>;<a name="index-rsa_005fgenerate_005fkeypair-278"></a></var><br>
 <blockquote><p>There are lots of parameters. <var>pub</var> and <var>key</var> is where the
 resulting key pair is stored. The structs should be initialized, but you
 don't need to call <code>rsa_public_key_prepare</code> or
@@ -2840,20 +2926,20 @@ pointed out below. For a start, there are no functions corresponding to
 <code>rsa_public_key_prepare</code> and <code>rsa_private_key_prepare</code>.
 
 <div class="defun">
-&mdash; Context struct: <b>dsa_public_key</b><var> p q g y<a name="index-dsa_005fpublic_005fkey-270"></a></var><br>
+&mdash; Context struct: <b>dsa_public_key</b><var> p q g y<a name="index-dsa_005fpublic_005fkey-279"></a></var><br>
 <blockquote><p>The public parameters described above. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Context struct: <b>dsa_private_key</b><var> x<a name="index-dsa_005fprivate_005fkey-271"></a></var><br>
+&mdash; Context struct: <b>dsa_private_key</b><var> x<a name="index-dsa_005fprivate_005fkey-280"></a></var><br>
 <blockquote><p>The private key <code>x</code>. 
 </p></blockquote></div>
 
    <p>Before use, these structs must be initialized by calling one of
 
 <div class="defun">
-&mdash; Function: void <b>dsa_public_key_init</b> (<var>struct dsa_public_key *pub</var>)<var><a name="index-dsa_005fpublic_005fkey_005finit-272"></a></var><br>
-&mdash; Function: void <b>dsa_private_key_init</b> (<var>struct dsa_private_key *key</var>)<var><a name="index-dsa_005fprivate_005fkey_005finit-273"></a></var><br>
+&mdash; Function: void <b>dsa_public_key_init</b> (<var>struct dsa_public_key *pub</var>)<var><a name="index-dsa_005fpublic_005fkey_005finit-281"></a></var><br>
+&mdash; Function: void <b>dsa_private_key_init</b> (<var>struct dsa_private_key *key</var>)<var><a name="index-dsa_005fprivate_005fkey_005finit-282"></a></var><br>
 <blockquote><p>Calls <code>mpz_init</code> on all numbers in the key struct. 
 </p></blockquote></div>
 
@@ -2861,8 +2947,8 @@ pointed out below. For a start, there are no functions corresponding to
 deallocated by calling one of
 
 <div class="defun">
-&mdash; Function: void <b>dsa_public_key_clear</b> (<var>struct dsa_public_key *pub</var>)<var><a name="index-dsa_005fpublic_005fkey_005fclear-274"></a></var><br>
-&mdash; Function: void <b>dsa_private_key_clear</b> (<var>struct dsa_private_key *key</var>)<var><a name="index-dsa_005fprivate_005fkey_005fclear-275"></a></var><br>
+&mdash; Function: void <b>dsa_public_key_clear</b> (<var>struct dsa_public_key *pub</var>)<var><a name="index-dsa_005fpublic_005fkey_005fclear-283"></a></var><br>
+&mdash; Function: void <b>dsa_private_key_clear</b> (<var>struct dsa_private_key *key</var>)<var><a name="index-dsa_005fprivate_005fkey_005fclear-284"></a></var><br>
 <blockquote><p>Calls <code>mpz_clear</code> on all numbers in the key struct. 
 </p></blockquote></div>
 
@@ -2870,12 +2956,12 @@ deallocated by calling one of
 initialized and cleared in the same way as the key structs.
 
 <div class="defun">
-&mdash; Context struct: <b>dsa_signature</b><var> r s<a name="index-dsa_005fsignature-276"></a></var><br>
+&mdash; Context struct: <b>dsa_signature</b><var> r s<a name="index-dsa_005fsignature-285"></a></var><br>
         </div>
 
 <div class="defun">
-&mdash; Function: void <b>dsa_signature_init</b> (<var>struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsignature_005finit-277"></a></var><br>
-&mdash; Function: void <b>dsa_signature_clear</b> (<var>struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsignature_005fclear-278"></a></var><br>
+&mdash; Function: void <b>dsa_signature_init</b> (<var>struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsignature_005finit-286"></a></var><br>
+&mdash; Function: void <b>dsa_signature_clear</b> (<var>struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsignature_005fclear-287"></a></var><br>
 <blockquote><p>You must call <code>dsa_signature_init</code> before creating or using a
 signature, and call <code>dsa_signature_clear</code> when you are finished
 with it. 
@@ -2890,10 +2976,10 @@ function, although the implementation of <acronym>DSA</acronym> with
 of official test vectors and interoperability testing.
 
 <div class="defun">
-&mdash; Function: int <b>dsa_sha1_sign</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, struct sha1_ctx *hash, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fsign-279"></a></var><br>
-&mdash; Function: int <b>dsa_sha1_sign_digest</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, const uint8_t *digest, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fsign_005fdigest-280"></a></var><br>
-&mdash; Function: int <b>dsa_sha256_sign</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, struct sha256_ctx *hash, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fsign-281"></a></var><br>
-&mdash; Function: int <b>dsa_sha256_sign_digest</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, const uint8_t *digest, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fsign_005fdigest-282"></a></var><br>
+&mdash; Function: int <b>dsa_sha1_sign</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, struct sha1_ctx *hash, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fsign-288"></a></var><br>
+&mdash; Function: int <b>dsa_sha1_sign_digest</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, const uint8_t *digest, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fsign_005fdigest-289"></a></var><br>
+&mdash; Function: int <b>dsa_sha256_sign</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, struct sha256_ctx *hash, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fsign-290"></a></var><br>
+&mdash; Function: int <b>dsa_sha256_sign_digest</b> (<var>const struct dsa_public_key *pub, const struct dsa_private_key *key, void *random_ctx, nettle_random_func random, const uint8_t *digest, struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fsign_005fdigest-291"></a></var><br>
 <blockquote><p>Creates a signature from the given hash context or digest. 
 <var>random_ctx</var> and <var>random</var> is a randomness generator. 
 <code>random(random_ctx, length, dst)</code> should generate <code>length</code>
@@ -2906,10 +2992,10 @@ Signing fails if the key size and the hash size don't match.
 needed. The functions are
 
 <div class="defun">
-&mdash; Function: int <b>dsa_sha1_verify</b> (<var>const struct dsa_public_key *key, struct sha1_ctx *hash, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fverify-283"></a></var><br>
-&mdash; Function: int <b>dsa_sha1_verify_digest</b> (<var>const struct dsa_public_key *key, const uint8_t *digest, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fverify_005fdigest-284"></a></var><br>
-&mdash; Function: int <b>dsa_sha256_verify</b> (<var>const struct dsa_public_key *key, struct sha256_ctx *hash, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fverify-285"></a></var><br>
-&mdash; Function: int <b>dsa_sha256_verify_digest</b> (<var>const struct dsa_public_key *key, const uint8_t *digest, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fverify_005fdigest-286"></a></var><br>
+&mdash; Function: int <b>dsa_sha1_verify</b> (<var>const struct dsa_public_key *key, struct sha1_ctx *hash, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fverify-292"></a></var><br>
+&mdash; Function: int <b>dsa_sha1_verify_digest</b> (<var>const struct dsa_public_key *key, const uint8_t *digest, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha1_005fverify_005fdigest-293"></a></var><br>
+&mdash; Function: int <b>dsa_sha256_verify</b> (<var>const struct dsa_public_key *key, struct sha256_ctx *hash, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fverify-294"></a></var><br>
+&mdash; Function: int <b>dsa_sha256_verify_digest</b> (<var>const struct dsa_public_key *key, const uint8_t *digest, const struct dsa_signature *signature</var>)<var><a name="index-dsa_005fsha256_005fverify_005fdigest-295"></a></var><br>
 <blockquote><p>Verifies a signature. Returns 1 if the signature is valid, otherwise 0. 
 </p></blockquote></div>
 
@@ -2917,7 +3003,7 @@ needed. The functions are
 <acronym>RSA</acronym> function.
 
 <div class="defun">
-&mdash; Function: int <b>dsa_generate_keypair</b> (<var>struct dsa_public_key *pub, struct dsa_private_key *key, void *random_ctx, nettle_random_func random, void *progress_ctx, nettle_progress_func progress, unsigned p_bits, unsigned q_bits</var>)<var><a name="index-dsa_005fgenerate_005fkeypair-287"></a></var><br>
+&mdash; Function: int <b>dsa_generate_keypair</b> (<var>struct dsa_public_key *pub, struct dsa_private_key *key, void *random_ctx, nettle_random_func random, void *progress_ctx, nettle_progress_func progress, unsigned p_bits, unsigned q_bits</var>)<var><a name="index-dsa_005fgenerate_005fkeypair-296"></a></var><br>
 <blockquote><p><var>pub</var> and <var>key</var> is where the resulting key pair is stored. The
 structs should be initialized before you call this function.
 
@@ -2954,7 +3040,7 @@ small.
 <div class="node">
 <a name="Randomness"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Miscellaneous-functions">Miscellaneous functions</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#Ascii-encoding">Ascii encoding</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Public_002dkey-algorithms">Public-key algorithms</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
 
@@ -2963,7 +3049,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
 <!-- node-name,  next,  previous,  up -->
 <h3 class="section">6.6 Randomness</h3>
 
-<p><a name="index-Randomness-288"></a>
+<p><a name="index-Randomness-297"></a>
 A crucial ingredient in many cryptographic contexts is randomness: Let
 <code>p</code> be a random prime, choose a random initialization vector
 <code>iv</code>, a random key <code>k</code> and a random exponent <code>e</code>, etc. In
@@ -3010,7 +3096,7 @@ other information he knows about the seeding process, still can't guess
 the seed correctly, then the conditional entropy is more than <code>n</code>
 bits.
 
-   <p><a name="index-Entropy-289"></a><a name="index-Conditional-entropy-290"></a>
+   <p><a name="index-Entropy-298"></a><a name="index-Conditional-entropy-299"></a>
 Let's look at an example. Say information about timing of received
 network packets is used in the seeding process. If there is some random
 network traffic going on, this will contribute some bits of entropy or
@@ -3172,28 +3258,28 @@ file, or feeding it input from its sources until a slow reseed happens.
    <p>Nettle defines Yarrow-256 in <samp><span class="file">&lt;nettle/yarrow.h&gt;</span></samp>.
 
 <div class="defun">
-&mdash; Context struct: <b>struct yarrow256_ctx</b><var><a name="index-struct-yarrow256_005fctx-291"></a></var><br>
+&mdash; Context struct: <b>struct yarrow256_ctx</b><var><a name="index-struct-yarrow256_005fctx-300"></a></var><br>
         </div>
 
 <div class="defun">
-&mdash; Context struct: <b>struct yarrow_source</b><var><a name="index-struct-yarrow_005fsource-292"></a></var><br>
+&mdash; Context struct: <b>struct yarrow_source</b><var><a name="index-struct-yarrow_005fsource-301"></a></var><br>
 <blockquote><p>Information about a single source. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Constant: <b>YARROW256_SEED_FILE_SIZE</b><var><a name="index-YARROW256_005fSEED_005fFILE_005fSIZE-293"></a></var><br>
+&mdash; Constant: <b>YARROW256_SEED_FILE_SIZE</b><var><a name="index-YARROW256_005fSEED_005fFILE_005fSIZE-302"></a></var><br>
 <blockquote><p>Recommanded size of the Yarrow-256 seed file. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>yarrow256_init</b> (<var>struct yarrow256_ctx *ctx, unsigned nsources, struct yarrow_source *sources</var>)<var><a name="index-yarrow256_005finit-294"></a></var><br>
+&mdash; Function: void <b>yarrow256_init</b> (<var>struct yarrow256_ctx *ctx, unsigned nsources, struct yarrow_source *sources</var>)<var><a name="index-yarrow256_005finit-303"></a></var><br>
 <blockquote><p>Initializes the yarrow context, and its <var>nsources</var> sources. It's
 possible to call it with <var>nsources</var>=0 and <var>sources</var>=NULL, if
 you don't need the update features. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>yarrow256_seed</b> (<var>struct yarrow256_ctx *ctx, unsigned length, uint8_t *seed_file</var>)<var><a name="index-yarrow256_005fseed-295"></a></var><br>
+&mdash; Function: void <b>yarrow256_seed</b> (<var>struct yarrow256_ctx *ctx, unsigned length, uint8_t *seed_file</var>)<var><a name="index-yarrow256_005fseed-304"></a></var><br>
 <blockquote><p>Seeds Yarrow-256 from a previous seed file. <var>length</var> should be at least
 <code>YARROW256_SEED_FILE_SIZE</code>, but it can be larger.
 
@@ -3205,7 +3291,7 @@ time, access must be coordinated using some locking mechanism.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: int <b>yarrow256_update</b> (<var>struct yarrow256_ctx *ctx, unsigned source, unsigned entropy, unsigned length, const uint8_t *data</var>)<var><a name="index-yarrow256_005fupdate-296"></a></var><br>
+&mdash; Function: int <b>yarrow256_update</b> (<var>struct yarrow256_ctx *ctx, unsigned source, unsigned entropy, unsigned length, const uint8_t *data</var>)<var><a name="index-yarrow256_005fupdate-305"></a></var><br>
 <blockquote><p>Updates the generator with data from source <var>SOURCE</var> (an index that
 must be smaller than the number of sources). <var>entropy</var> is your
 estimated lower bound for the entropy in the data, measured in bits. 
@@ -3219,7 +3305,7 @@ function returns 0.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>yarrow256_random</b> (<var>struct yarrow256_ctx *ctx, unsigned length, uint8_t *dst</var>)<var><a name="index-yarrow256_005frandom-297"></a></var><br>
+&mdash; Function: void <b>yarrow256_random</b> (<var>struct yarrow256_ctx *ctx, unsigned length, uint8_t *dst</var>)<var><a name="index-yarrow256_005frandom-306"></a></var><br>
 <blockquote><p>Generates <var>length</var> octets of output. The generator must be seeded
 before you call this function.
 
@@ -3230,20 +3316,20 @@ blocks of data, say 100-1000 octets at a time.
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: int <b>yarrow256_is_seeded</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fis_005fseeded-298"></a></var><br>
+&mdash; Function: int <b>yarrow256_is_seeded</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fis_005fseeded-307"></a></var><br>
 <blockquote><p>Returns 1 if the generator is seeded and ready to generate output,
 otherwise 0. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: unsigned <b>yarrow256_needed_sources</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fneeded_005fsources-299"></a></var><br>
+&mdash; Function: unsigned <b>yarrow256_needed_sources</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fneeded_005fsources-308"></a></var><br>
 <blockquote><p>Returns the number of sources that must reach the threshold before a
 slow reseed will happen. Useful primarily when the generator is unseeded. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>yarrow256_fast_reseed</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005ffast_005freseed-300"></a></var><br>
-&mdash; Function: void <b>yarrow256_slow_reseed</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fslow_005freseed-301"></a></var><br>
+&mdash; Function: void <b>yarrow256_fast_reseed</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005ffast_005freseed-309"></a></var><br>
+&mdash; Function: void <b>yarrow256_slow_reseed</b> (<var>struct yarrow256_ctx *ctx</var>)<var><a name="index-yarrow256_005fslow_005freseed-310"></a></var><br>
 <blockquote><p>Causes a fast or slow reseed to take place immediately, regardless of the
 current entropy estimates of the two pools. Use with care. 
 </p></blockquote></div>
@@ -3252,17 +3338,17 @@ current entropy estimates of the two pools. Use with care.
 keyboard input.
 
 <div class="defun">
-&mdash; Context struct: <b>struct yarrow_key_event_ctx</b><var><a name="index-struct-yarrow_005fkey_005fevent_005fctx-302"></a></var><br>
+&mdash; Context struct: <b>struct yarrow_key_event_ctx</b><var><a name="index-struct-yarrow_005fkey_005fevent_005fctx-311"></a></var><br>
 <blockquote><p>Information about recent key events. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: void <b>yarrow_key_event_init</b> (<var>struct yarrow_key_event_ctx *ctx</var>)<var><a name="index-yarrow_005fkey_005fevent_005finit-303"></a></var><br>
+&mdash; Function: void <b>yarrow_key_event_init</b> (<var>struct yarrow_key_event_ctx *ctx</var>)<var><a name="index-yarrow_005fkey_005fevent_005finit-312"></a></var><br>
 <blockquote><p>Initializes the context. 
 </p></blockquote></div>
 
 <div class="defun">
-&mdash; Function: unsigned <b>yarrow_key_event_estimate</b> (<var>struct yarrow_key_event_ctx *ctx, unsigned key, unsigned time</var>)<var><a name="index-yarrow_005fkey_005fevent_005festimate-304"></a></var><br>
+&mdash; Function: unsigned <b>yarrow_key_event_estimate</b> (<var>struct yarrow_key_event_ctx *ctx, unsigned key, unsigned time</var>)<var><a name="index-yarrow_005fkey_005fevent_005festimate-313"></a></var><br>
 <blockquote><p><var>key</var> is the id of the key (ASCII value, hardware key code, X
 keysym, <small class="dots">...</small>, it doesn't matter), and <var>time</var> is the timestamp of
 the event. The time must be given in units matching the resolution by
@@ -3277,19 +3363,200 @@ units of 10 microseconds.
 </p></blockquote></div>
 
 <div class="node">
-<a name="Miscellaneous-functions"></a>
+<a name="Ascii-encoding"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Compatibility-functions">Compatibility functions</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#Miscellaneous-functions">Miscellaneous functions</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Randomness">Randomness</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
 
 </div>
 
 <!-- node-name,  next,  previous,  up -->
-<h3 class="section">6.7 Miscellaneous functions</h3>
+<h3 class="section">6.7 Ascii encoding</h3>
+
+<p>Encryption will transform your data from text into binary format, and that
+may be a problem if you want, for example, to send the data as if it was
+plain text in an email (or store it along with descriptive text in a
+file). You may then use an encoding from binary to text: each binary byte
+is translated into a number of bytes of plain text.
+
+   <p>A base-N encoding of data is one representation of data that only uses N
+different symbols (instead of the 256 possible values of a byte).
+
+   <p>The base64 encoding will always use alphanumeric (upper and lower case)
+characters and the '+', '/' and '=' symbols to represent the data. Four
+output characters are generated for each three bytes of input. In case
+the length of the input is not a multiple of three, padding characters
+are added at the end.
+
+   <p>The base16 encoding, also known as &ldquo;hexadecimal&rdquo;, uses the decimal
+digits and the letters from A to F. Two hexadecimal digits are generated
+for each input byte. Base16 may be useful if you want to use the data
+for filenames or URLs, for example.
+
+   <p>Nettle supports both base64 and base16 encoding and decoding.
+
+   <p>Encoding and decoding uses a context struct to maintain its state (with
+the exception of base16 encoding, which doesn't need any). To encode or
+decode the your data, first initialize the context, then call the update
+function as many times as necessary, and complete the operation by
+calling the final function.
+
+   <p>The following functions can be used to perform base64 encoding and decoding. 
+They are defined in <samp><span class="file">&lt;nettle/base64.h&gt;</span></samp>.
 
 <div class="defun">
-&mdash; Function: uint8_t * <b>memxor</b> (<var>uint8_t *dst, const uint8_t *src, size_t n</var>)<var><a name="index-memxor-305"></a></var><br>
+&mdash; Context struct: <b>struct base64_encode_ctx</b><var><a name="index-struct-base64_005fencode_005fctx-314"></a></var><br>
+        </div>
+
+<div class="defun">
+&mdash; Function: void <b>base64_encode_init</b> (<var>struct base64_encode_ctx *ctx</var>)<var><a name="index-base64_005fencode_005finit-315"></a></var><br>
+<blockquote><p>Initializes a base64 context. This is necessary before starting an encoding
+session. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: unsigned <b>base64_encode_single</b> (<var>struct base64_encode_ctx *ctx, uint8_t *dst, uint8_t src</var>)<var><a name="index-base64_005fencode_005fsingle-316"></a></var><br>
+<blockquote><p>Encodes a single byte. Returns amount of output (always 1 or 2). 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Macro: <b>BASE64_ENCODE_LENGTH</b> (<var>length</var>)<var><a name="index-BASE64_005fENCODE_005fLENGTH-317"></a></var><br>
+<blockquote><p>The maximum number of output bytes when passing <var>length</var> input bytes
+to <code>base64_encode_update</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: unsigned <b>base64_encode_update</b> (<var>struct base64_encode_ctx *ctx, uint8_t *dst, unsigned length, const uint8_t *src</var>)<var><a name="index-base64_005fencode_005fupdate-318"></a></var><br>
+<blockquote><p>After <var>ctx</var> is initialized, this function may be called to encode <var>length</var>
+bytes from <var>src</var>. The result will be placed in <var>dst</var>, and the return value
+will be the number of bytes generated. Note that <var>dst</var> must be at least of size
+BASE64_ENCODE_LENGTH(<var>length</var>). 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Constant: <b>BASE64_ENCODE_FINAL_LENGTH</b><var><a name="index-BASE64_005fENCODE_005fFINAL_005fLENGTH-319"></a></var><br>
+<blockquote><p>The maximum amount of output from <code>base64_encode_final</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: unsigned <b>base64_encode_final</b> (<var>struct base64_encode_ctx *ctx, uint8_t *dst</var>)<var><a name="index-base64_005fencode_005ffinal-320"></a></var><br>
+<blockquote><p>After calling base64_encode_update one or more times, this function
+should be called to generate the final output bytes, including any
+needed paddding. The return value is the number of output bytes
+generated. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Context struct: <b>struct base64_decode_ctx</b><var><a name="index-struct-base64_005fdecode_005fctx-321"></a></var><br>
+        </div>
+
+<div class="defun">
+&mdash; Function: void <b>base64_decode_init</b> (<var>struct base64_decode_ctx *ctx</var>)<var><a name="index-base64_005fdecode_005finit-322"></a></var><br>
+<blockquote><p>Initializes a base64 decoding context. This is necessary before starting a decoding
+session. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: int <b>base64_decode_single</b> (<var>struct base64_decode_ctx *ctx, uint8_t *dst, uint8_t src</var>)<var><a name="index-base64_005fdecode_005fsingle-323"></a></var><br>
+<blockquote><p>Decodes a single byte (<var>src</var>) and stores the result in <var>dst</var>. 
+Returns amount of output (0 or 1), or -1 on errors. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Macro: <b>BASE64_DECODE_LENGTH</b> (<var>length</var>)<var><a name="index-BASE64_005fDECODE_005fLENGTH-324"></a></var><br>
+<blockquote><p>The maximum number of output bytes when passing <var>length</var> input bytes
+to <code>base64_decode_update</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: void <b>base64_decode_update</b> (<var>struct base64_decode_ctx *ctx, unsigned *dst_length, uint8_t *dst, unsigned src_length, const uint8_t *src</var>)<var><a name="index-base64_005fdecode_005fupdate-325"></a></var><br>
+<blockquote><p>After <var>ctx</var> is initialized, this function may be called to decode <var>src_length</var>
+bytes from <var>src</var>. <var>dst</var> should point to an area of size at least
+BASE64_DECODE_LENGTH(<var>length</var>), and for sanity checking, <var>dst_length</var>
+should be initialized to the size of that area before the call. 
+<var>dst_length</var> is updated to the amount of decoded output. The function will return
+1 on success and 0 on error. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: int <b>base64_decode_final</b> (<var>struct base64_decode_ctx *ctx</var>)<var><a name="index-base64_005fdecode_005ffinal-326"></a></var><br>
+<blockquote><p>Check that final padding is correct. Returns 1 on success, and 0 on
+error. 
+</p></blockquote></div>
+
+   <p>Similarly to the base64 functions, the following functions perform base16 encoding,
+and are defined in <samp><span class="file">&lt;nettle/base16.h&gt;</span></samp>. Note that there is no encoding context
+necessary for doing base16 encoding.
+
+<div class="defun">
+&mdash; Function: void <b>base16_encode_single</b> (<var>uint8_t *dst, uint8_t src</var>)<var><a name="index-base16_005fencode_005fsingle-327"></a></var><br>
+<blockquote><p>Encodes a single byte. Always stores two digits in <var>dst</var>[0] and <var>dst</var>[1]. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Macro: <b>BASE16_ENCODE_LENGTH</b> (<var>length</var>)<var><a name="index-BASE16_005fENCODE_005fLENGTH-328"></a></var><br>
+<blockquote><p>The number of output bytes when passing <var>length</var> input bytes to
+<code>base16_encode_update</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: void <b>base16_encode_update</b> (<var>uint8_t *dst, unsigned length, const uint8_t *src</var>)<var><a name="index-base16_005fencode_005fupdate-329"></a></var><br>
+<blockquote><p>Always stores BASE16_ENCODE_LENGTH(<var>length</var>) digits in <var>dst</var>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Context struct: <b>struct base16_decode_ctx</b><var><a name="index-struct-base16_005fdecode_005fctx-330"></a></var><br>
+        </div>
+
+<div class="defun">
+&mdash; Function: void <b>base16_decode_init</b> (<var>struct base16_decode_ctx *ctx</var>)<var><a name="index-base16_005fdecode_005finit-331"></a></var><br>
+<blockquote><p>Initializes a base16 decoding context. This is necessary before starting a decoding
+session. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: int <b>base16_decode_single</b> (<var>struct base16_decode_ctx *ctx, uint8_t *dst, uint8_t src</var>)<var><a name="index-base16_005fdecode_005fsingle-332"></a></var><br>
+<blockquote><p>Decodes a single byte from <var>src</var> into <var>dst</var>. Returns amount of output (0 or 1), or -1 on errors. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Macro: <b>BASE16_DECODE_LENGTH</b> (<var>length</var>)<var><a name="index-BASE16_005fDECODE_005fLENGTH-333"></a></var><br>
+<blockquote><p>The maximum number of output bytes when passing <var>length</var> input bytes
+to <code>base16_decode_update</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: int <b>base16_decode_update</b> (<var>struct base16_decode_ctx *ctx, unsigned *dst_length, uint8_t *dst, unsigned src_length, const uint8_t *src</var>)<var><a name="index-base16_005fdecode_005fupdate-334"></a></var><br>
+<blockquote><p>After <var>ctx</var> is initialized, this function may be called to decode <var>src_length</var>
+bytes from <var>src</var>. <var>dst</var> should point to an area of size at least
+BASE16_DECODE_LENGTH(<var>length</var>), and for sanity checking, <var>dst_length</var>
+should be initialized to the size of that area before the call. 
+<var>dst_length</var> is updated to the amount of decoded output. The function will return
+1 on success and 0 on error. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: int <b>base16_decode_final</b> (<var>struct base16_decode_ctx *ctx</var>)<var><a name="index-base16_005fdecode_005ffinal-335"></a></var><br>
+<blockquote><p>Checks that the end of data is correct (i.e., an even number of
+hexadecimal digits have been seen). Returns 1 on success, and 0 on
+error. 
+</p></blockquote></div>
+
+<div class="node">
+<a name="Miscellaneous-functions"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Compatibility-functions">Compatibility functions</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Ascii-encoding">Ascii encoding</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
+
+</div>
+
+<!-- node-name,  next,  previous,  up -->
+<h3 class="section">6.8 Miscellaneous functions</h3>
+
+<div class="defun">
+&mdash; Function: uint8_t * <b>memxor</b> (<var>uint8_t *dst, const uint8_t *src, size_t n</var>)<var><a name="index-memxor-336"></a></var><br>
 <blockquote><p>XORs the source area on top of the destination area. The interface
 doesn't follow the Nettle conventions, because it is intended to be
 similar to the ANSI-C <code>memcpy</code> function. 
@@ -3306,7 +3573,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Reference">Reference</a>
 </div>
 
 <!-- node-name,  next,  previous,  up -->
-<h3 class="section">6.8 Compatibility functions</h3>
+<h3 class="section">6.9 Compatibility functions</h3>
 
 <p>For convenience, Nettle includes alternative interfaces to some
 algorithms, for compatibility with some other popular crypto toolkits. 
@@ -3387,16 +3654,13 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
      make check
      make install
 </pre>
-   <p class="noindent">to install in the default location, <samp><span class="file">/usr/local</span></samp>. The library files
-are installed in <samp><span class="file">/use/local/lib/libnettle.a</span></samp>
-<samp><span class="file">/use/local/lib/libhogweed.a</span></samp> and the include files are installed
-in <samp><span class="file">/use/local/include/nettle/</span></samp>.
+   <p class="noindent">to install in under the default prefix, <samp><span class="file">/usr/local</span></samp>.
 
    <p>To get a list of configure options, use <code>./configure --help</code>.
 
-   <p>By default, only static libraries are built and installed. To also build
-and install shared libraries, use the <samp><span class="option"> --enable-shared</span></samp> option
-to <samp><span class="command">./configure</span></samp>.
+   <p>By default, both static and shared libraries are built and installed. To
+omit building the shared libraries, use the <samp><span class="option"> --disable-shared</span></samp>
+option to <samp><span class="command">./configure</span></samp>.
 
    <p>Using GNU make is recommended. For other make programs, in particular
 BSD make, you may have to use the <samp><span class="option">--disable-dependency-tracking</span></samp>
@@ -3426,6 +3690,24 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#index-arctwo_005fset_005fkey-94"><code>arctwo_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-arctwo_005fset_005fkey_005fekb-93"><code>arctwo_set_key_ekb</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-arctwo_005fset_005fkey_005fgutmann-95"><code>arctwo_set_key_gutmann</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-base16_005fdecode_005ffinal-335"><code>base16_decode_final</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base16_005fdecode_005finit-331"><code>base16_decode_init</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-BASE16_005fDECODE_005fLENGTH-333"><code>BASE16_DECODE_LENGTH</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base16_005fdecode_005fsingle-332"><code>base16_decode_single</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base16_005fdecode_005fupdate-334"><code>base16_decode_update</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-BASE16_005fENCODE_005fLENGTH-328"><code>BASE16_ENCODE_LENGTH</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base16_005fencode_005fsingle-327"><code>base16_encode_single</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base16_005fencode_005fupdate-329"><code>base16_encode_update</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fdecode_005ffinal-326"><code>base64_decode_final</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fdecode_005finit-322"><code>base64_decode_init</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-BASE64_005fDECODE_005fLENGTH-324"><code>BASE64_DECODE_LENGTH</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fdecode_005fsingle-323"><code>base64_decode_single</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fdecode_005fupdate-325"><code>base64_decode_update</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fencode_005ffinal-320"><code>base64_encode_final</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fencode_005finit-315"><code>base64_encode_init</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-BASE64_005fENCODE_005fLENGTH-317"><code>BASE64_ENCODE_LENGTH</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fencode_005fsingle-316"><code>base64_encode_single</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
+<li><a href="#index-base64_005fencode_005fupdate-318"><code>base64_encode_update</code></a>: <a href="#Ascii-encoding">Ascii encoding</a></li>
 <li><a href="#index-Block-Cipher-70">Block Cipher</a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-blowfish_005fdecrypt-105"><code>blowfish_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-blowfish_005fencrypt-104"><code>blowfish_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
@@ -3437,23 +3719,23 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#index-cast128_005fdecrypt-122"><code>cast128_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-cast128_005fencrypt-121"><code>cast128_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-cast128_005fset_005fkey-120"><code>cast128_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-CBC-Mode-174">CBC Mode</a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-CBC_005fCTX-177"><code>CBC_CTX</code></a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-CBC_005fDECRYPT-180"><code>CBC_DECRYPT</code></a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-cbc_005fdecrypt-176"><code>cbc_decrypt</code></a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-CBC_005fENCRYPT-179"><code>CBC_ENCRYPT</code></a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-cbc_005fencrypt-175"><code>cbc_encrypt</code></a>: <a href="#CBC">CBC</a></li>
-<li><a href="#index-CBC_005fSET_005fIV-178"><code>CBC_SET_IV</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-CBC-Mode-183">CBC Mode</a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-CBC_005fCTX-186"><code>CBC_CTX</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-CBC_005fDECRYPT-189"><code>CBC_DECRYPT</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-cbc_005fdecrypt-185"><code>cbc_decrypt</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-CBC_005fENCRYPT-188"><code>CBC_ENCRYPT</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-cbc_005fencrypt-184"><code>cbc_encrypt</code></a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-CBC_005fSET_005fIV-187"><code>CBC_SET_IV</code></a>: <a href="#CBC">CBC</a></li>
 <li><a href="#index-Cipher-69">Cipher</a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-Cipher-Block-Chaining-173">Cipher Block Chaining</a>: <a href="#CBC">CBC</a></li>
+<li><a href="#index-Cipher-Block-Chaining-182">Cipher Block Chaining</a>: <a href="#CBC">CBC</a></li>
 <li><a href="#index-Collision_002dresistant-3">Collision-resistant</a>: <a href="#Hash-functions">Hash functions</a></li>
-<li><a href="#index-Conditional-entropy-290">Conditional entropy</a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-Counter-Mode-181">Counter Mode</a>: <a href="#CTR">CTR</a></li>
-<li><a href="#index-CTR-Mode-182">CTR Mode</a>: <a href="#CTR">CTR</a></li>
-<li><a href="#index-CTR_005fCRYPT-186"><code>CTR_CRYPT</code></a>: <a href="#CTR">CTR</a></li>
-<li><a href="#index-ctr_005fcrypt-183"><code>ctr_crypt</code></a>: <a href="#CTR">CTR</a></li>
-<li><a href="#index-CTR_005fCTX-184"><code>CTR_CTX</code></a>: <a href="#CTR">CTR</a></li>
-<li><a href="#index-CTR_005fSET_005fCOUNTER-185"><code>CTR_SET_COUNTER</code></a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-Conditional-entropy-299">Conditional entropy</a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-Counter-Mode-190">Counter Mode</a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-CTR-Mode-191">CTR Mode</a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-CTR_005fCRYPT-195"><code>CTR_CRYPT</code></a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-ctr_005fcrypt-192"><code>ctr_crypt</code></a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-CTR_005fCTX-193"><code>CTR_CTX</code></a>: <a href="#CTR">CTR</a></li>
+<li><a href="#index-CTR_005fSET_005fCOUNTER-194"><code>CTR_SET_COUNTER</code></a>: <a href="#CTR">CTR</a></li>
 <li><a href="#index-des3_005fdecrypt-136"><code>des3_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-des3_005fencrypt-135"><code>des3_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-des3_005fset_005fkey-134"><code>des3_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
@@ -3462,67 +3744,67 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#index-des_005fencrypt-127"><code>des_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-des_005ffix_005fparity-130"><code>des_fix_parity</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-des_005fset_005fkey-126"><code>des_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-dsa_005fgenerate_005fkeypair-287"><code>dsa_generate_keypair</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fprivate_005fkey_005fclear-275"><code>dsa_private_key_clear</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fprivate_005fkey_005finit-273"><code>dsa_private_key_init</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fpublic_005fkey_005fclear-274"><code>dsa_public_key_clear</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fpublic_005fkey_005finit-272"><code>dsa_public_key_init</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha1_005fsign-279"><code>dsa_sha1_sign</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha1_005fsign_005fdigest-280"><code>dsa_sha1_sign_digest</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha1_005fverify-283"><code>dsa_sha1_verify</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha1_005fverify_005fdigest-284"><code>dsa_sha1_verify_digest</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha256_005fsign-281"><code>dsa_sha256_sign</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha256_005fsign_005fdigest-282"><code>dsa_sha256_sign_digest</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha256_005fverify-285"><code>dsa_sha256_verify</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsha256_005fverify_005fdigest-286"><code>dsa_sha256_verify_digest</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsignature_005fclear-278"><code>dsa_signature_clear</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-dsa_005fsignature_005finit-277"><code>dsa_signature_init</code></a>: <a href="#DSA">DSA</a></li>
-<li><a href="#index-Entropy-289">Entropy</a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-Galois-Counter-Mode-187">Galois Counter Mode</a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM-188">GCM</a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fdecrypt-211"><code>gcm_aes_decrypt</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fdigest-212"><code>gcm_aes_digest</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fencrypt-210"><code>gcm_aes_encrypt</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fset_005fiv-208"><code>gcm_aes_set_iv</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fset_005fkey-207"><code>gcm_aes_set_key</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005faes_005fupdate-209"><code>gcm_aes_update</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fCTX-199"><code>GCM_CTX</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fDECRYPT-204"><code>GCM_DECRYPT</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fdecrypt-197"><code>gcm_decrypt</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fDIGEST-205"><code>GCM_DIGEST</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fdigest-198"><code>gcm_digest</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fENCRYPT-203"><code>GCM_ENCRYPT</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fencrypt-196"><code>gcm_encrypt</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fSET_005fIV-201"><code>GCM_SET_IV</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fset_005fiv-194"><code>gcm_set_iv</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fSET_005fKEY-200"><code>GCM_SET_KEY</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fset_005fkey-193"><code>gcm_set_key</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-GCM_005fUPDATE-202"><code>GCM_UPDATE</code></a>: <a href="#GCM">GCM</a></li>
-<li><a href="#index-gcm_005fupdate-195"><code>gcm_update</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-dsa_005fgenerate_005fkeypair-296"><code>dsa_generate_keypair</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fprivate_005fkey_005fclear-284"><code>dsa_private_key_clear</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fprivate_005fkey_005finit-282"><code>dsa_private_key_init</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fpublic_005fkey_005fclear-283"><code>dsa_public_key_clear</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fpublic_005fkey_005finit-281"><code>dsa_public_key_init</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha1_005fsign-288"><code>dsa_sha1_sign</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha1_005fsign_005fdigest-289"><code>dsa_sha1_sign_digest</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha1_005fverify-292"><code>dsa_sha1_verify</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha1_005fverify_005fdigest-293"><code>dsa_sha1_verify_digest</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha256_005fsign-290"><code>dsa_sha256_sign</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha256_005fsign_005fdigest-291"><code>dsa_sha256_sign_digest</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha256_005fverify-294"><code>dsa_sha256_verify</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsha256_005fverify_005fdigest-295"><code>dsa_sha256_verify_digest</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsignature_005fclear-287"><code>dsa_signature_clear</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-dsa_005fsignature_005finit-286"><code>dsa_signature_init</code></a>: <a href="#DSA">DSA</a></li>
+<li><a href="#index-Entropy-298">Entropy</a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-Galois-Counter-Mode-196">Galois Counter Mode</a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM-197">GCM</a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fdecrypt-220"><code>gcm_aes_decrypt</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fdigest-221"><code>gcm_aes_digest</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fencrypt-219"><code>gcm_aes_encrypt</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fset_005fiv-217"><code>gcm_aes_set_iv</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fset_005fkey-216"><code>gcm_aes_set_key</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005faes_005fupdate-218"><code>gcm_aes_update</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fCTX-208"><code>GCM_CTX</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fDECRYPT-213"><code>GCM_DECRYPT</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fdecrypt-206"><code>gcm_decrypt</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fDIGEST-214"><code>GCM_DIGEST</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fdigest-207"><code>gcm_digest</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fENCRYPT-212"><code>GCM_ENCRYPT</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fencrypt-205"><code>gcm_encrypt</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fSET_005fIV-210"><code>GCM_SET_IV</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fset_005fiv-203"><code>gcm_set_iv</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fSET_005fKEY-209"><code>GCM_SET_KEY</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fset_005fkey-202"><code>gcm_set_key</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-GCM_005fUPDATE-211"><code>GCM_UPDATE</code></a>: <a href="#GCM">GCM</a></li>
+<li><a href="#index-gcm_005fupdate-204"><code>gcm_update</code></a>: <a href="#GCM">GCM</a></li>
 <li><a href="#index-Hash-function-1">Hash function</a>: <a href="#Hash-functions">Hash functions</a></li>
-<li><a href="#index-HMAC_005fCTX-219"><code>HMAC_CTX</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-HMAC_005fDIGEST-221"><code>HMAC_DIGEST</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fdigest-218"><code>hmac_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fmd5_005fdigest-225"><code>hmac_md5_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fmd5_005fset_005fkey-223"><code>hmac_md5_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fmd5_005fupdate-224"><code>hmac_md5_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fripemd160_005fdigest-229"><code>hmac_ripemd160_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fripemd160_005fset_005fkey-227"><code>hmac_ripemd160_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fripemd160_005fupdate-228"><code>hmac_ripemd160_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-HMAC_005fSET_005fKEY-220"><code>HMAC_SET_KEY</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fset_005fkey-216"><code>hmac_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha1_005fdigest-233"><code>hmac_sha1_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha1_005fset_005fkey-231"><code>hmac_sha1_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha1_005fupdate-232"><code>hmac_sha1_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha256_005fdigest-237"><code>hmac_sha256_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha256_005fset_005fkey-235"><code>hmac_sha256_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha256_005fupdate-236"><code>hmac_sha256_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha512_005fdigest-241"><code>hmac_sha512_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha512_005fset_005fkey-239"><code>hmac_sha512_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fsha512_005fupdate-240"><code>hmac_sha512_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-hmac_005fupdate-217"><code>hmac_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-Keyed-Hash-Function-213">Keyed Hash Function</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
-<li><a href="#index-MAC-215">MAC</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-HMAC_005fCTX-228"><code>HMAC_CTX</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-HMAC_005fDIGEST-230"><code>HMAC_DIGEST</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fdigest-227"><code>hmac_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fmd5_005fdigest-234"><code>hmac_md5_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fmd5_005fset_005fkey-232"><code>hmac_md5_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fmd5_005fupdate-233"><code>hmac_md5_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fripemd160_005fdigest-238"><code>hmac_ripemd160_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fripemd160_005fset_005fkey-236"><code>hmac_ripemd160_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fripemd160_005fupdate-237"><code>hmac_ripemd160_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-HMAC_005fSET_005fKEY-229"><code>HMAC_SET_KEY</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fset_005fkey-225"><code>hmac_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha1_005fdigest-242"><code>hmac_sha1_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha1_005fset_005fkey-240"><code>hmac_sha1_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha1_005fupdate-241"><code>hmac_sha1_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha256_005fdigest-246"><code>hmac_sha256_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha256_005fset_005fkey-244"><code>hmac_sha256_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha256_005fupdate-245"><code>hmac_sha256_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha512_005fdigest-250"><code>hmac_sha512_digest</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha512_005fset_005fkey-248"><code>hmac_sha512_set_key</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fsha512_005fupdate-249"><code>hmac_sha512_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-hmac_005fupdate-226"><code>hmac_update</code></a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-Keyed-Hash-Function-222">Keyed Hash Function</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-MAC-224">MAC</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
 <li><a href="#index-md2_005fdigest-15"><code>md2_digest</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-md2_005finit-13"><code>md2_init</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-md2_005fupdate-14"><code>md2_update</code></a>: <a href="#Hash-functions">Hash functions</a></li>
@@ -3532,42 +3814,45 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#index-md5_005fdigest-9"><code>md5_digest</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-md5_005finit-7"><code>md5_init</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-md5_005fupdate-8"><code>md5_update</code></a>: <a href="#Hash-functions">Hash functions</a></li>
-<li><a href="#index-memxor-305"><code>memxor</code></a>: <a href="#Miscellaneous-functions">Miscellaneous functions</a></li>
-<li><a href="#index-Message-Authentication-Code-214">Message Authentication Code</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
+<li><a href="#index-memxor-336"><code>memxor</code></a>: <a href="#Miscellaneous-functions">Miscellaneous functions</a></li>
+<li><a href="#index-Message-Authentication-Code-223">Message Authentication Code</a>: <a href="#Keyed-hash-functions">Keyed hash functions</a></li>
 <li><a href="#index-One_002dway-2">One-way</a>: <a href="#Hash-functions">Hash functions</a></li>
-<li><a href="#index-One_002dway-function-243">One-way function</a>: <a href="#Public_002dkey-algorithms">Public-key algorithms</a></li>
-<li><a href="#index-Public-Key-Cryptography-242">Public Key Cryptography</a>: <a href="#Public_002dkey-algorithms">Public-key algorithms</a></li>
-<li><a href="#index-Randomness-288">Randomness</a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-One_002dway-function-252">One-way function</a>: <a href="#Public_002dkey-algorithms">Public-key algorithms</a></li>
+<li><a href="#index-Public-Key-Cryptography-251">Public Key Cryptography</a>: <a href="#Public_002dkey-algorithms">Public-key algorithms</a></li>
+<li><a href="#index-Randomness-297">Randomness</a>: <a href="#Randomness">Randomness</a></li>
 <li><a href="#index-ripemd160_005fdigest-27"><code>ripemd160_digest</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-ripemd160_005finit-25"><code>ripemd160_init</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-ripemd160_005fupdate-26"><code>ripemd160_update</code></a>: <a href="#Hash-functions">Hash functions</a></li>
-<li><a href="#index-rsa_005fcompute_005froot-268"><code>rsa_compute_root</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fgenerate_005fkeypair-269"><code>rsa_generate_keypair</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fmd5_005fsign-252"><code>rsa_md5_sign</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fmd5_005fsign_005fdigest-256"><code>rsa_md5_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fmd5_005fverify-260"><code>rsa_md5_verify</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fmd5_005fverify_005fdigest-264"><code>rsa_md5_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fprivate_005fkey_005fclear-249"><code>rsa_private_key_clear</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fprivate_005fkey_005finit-247"><code>rsa_private_key_init</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fprivate_005fkey_005fprepare-251"><code>rsa_private_key_prepare</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fpublic_005fkey_005fclear-248"><code>rsa_public_key_clear</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fpublic_005fkey_005finit-246"><code>rsa_public_key_init</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fpublic_005fkey_005fprepare-250"><code>rsa_public_key_prepare</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha1_005fsign-253"><code>rsa_sha1_sign</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha1_005fsign_005fdigest-257"><code>rsa_sha1_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha1_005fverify-261"><code>rsa_sha1_verify</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha1_005fverify_005fdigest-265"><code>rsa_sha1_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha256_005fsign-254"><code>rsa_sha256_sign</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha256_005fsign_005fdigest-258"><code>rsa_sha256_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha256_005fverify-262"><code>rsa_sha256_verify</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha256_005fverify_005fdigest-266"><code>rsa_sha256_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha512_005fsign-255"><code>rsa_sha512_sign</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha512_005fsign_005fdigest-259"><code>rsa_sha512_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha512_005fverify-263"><code>rsa_sha512_verify</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-rsa_005fsha512_005fverify_005fdigest-267"><code>rsa_sha512_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
-<li><a href="#index-serpent_005fdecrypt-144"><code>serpent_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-serpent_005fencrypt-143"><code>serpent_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-serpent_005fset_005fkey-142"><code>serpent_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-rsa_005fcompute_005froot-277"><code>rsa_compute_root</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fgenerate_005fkeypair-278"><code>rsa_generate_keypair</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fmd5_005fsign-261"><code>rsa_md5_sign</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fmd5_005fsign_005fdigest-265"><code>rsa_md5_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fmd5_005fverify-269"><code>rsa_md5_verify</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fmd5_005fverify_005fdigest-273"><code>rsa_md5_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fprivate_005fkey_005fclear-258"><code>rsa_private_key_clear</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fprivate_005fkey_005finit-256"><code>rsa_private_key_init</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fprivate_005fkey_005fprepare-260"><code>rsa_private_key_prepare</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fpublic_005fkey_005fclear-257"><code>rsa_public_key_clear</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fpublic_005fkey_005finit-255"><code>rsa_public_key_init</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fpublic_005fkey_005fprepare-259"><code>rsa_public_key_prepare</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha1_005fsign-262"><code>rsa_sha1_sign</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha1_005fsign_005fdigest-266"><code>rsa_sha1_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha1_005fverify-270"><code>rsa_sha1_verify</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha1_005fverify_005fdigest-274"><code>rsa_sha1_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha256_005fsign-263"><code>rsa_sha256_sign</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha256_005fsign_005fdigest-267"><code>rsa_sha256_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha256_005fverify-271"><code>rsa_sha256_verify</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha256_005fverify_005fdigest-275"><code>rsa_sha256_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha512_005fsign-264"><code>rsa_sha512_sign</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha512_005fsign_005fdigest-268"><code>rsa_sha512_sign_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha512_005fverify-272"><code>rsa_sha512_verify</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-rsa_005fsha512_005fverify_005fdigest-276"><code>rsa_sha512_verify_digest</code></a>: <a href="#RSA">RSA</a></li>
+<li><a href="#index-salsa20_005fcrypt-145"><code>salsa20_crypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-salsa20_005fset_005fiv-144"><code>salsa20_set_iv</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-salsa20_005fset_005fkey-143"><code>salsa20_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-serpent_005fdecrypt-153"><code>serpent_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-serpent_005fencrypt-152"><code>serpent_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-serpent_005fset_005fkey-151"><code>serpent_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
 <li><a href="#index-sha1_005fdigest-33"><code>sha1_digest</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-sha1_005finit-31"><code>sha1_init</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-sha1_005fupdate-32"><code>sha1_update</code></a>: <a href="#Hash-functions">Hash functions</a></li>
@@ -3584,19 +3869,19 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#index-sha512_005finit-49"><code>sha512_init</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-sha512_005fupdate-50"><code>sha512_update</code></a>: <a href="#Hash-functions">Hash functions</a></li>
 <li><a href="#index-Stream-Cipher-71">Stream Cipher</a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-twofish_005fdecrypt-152"><code>twofish_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-twofish_005fencrypt-151"><code>twofish_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-twofish_005fset_005fkey-150"><code>twofish_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
-<li><a href="#index-yarrow256_005ffast_005freseed-300"><code>yarrow256_fast_reseed</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005finit-294"><code>yarrow256_init</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005fis_005fseeded-298"><code>yarrow256_is_seeded</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005fneeded_005fsources-299"><code>yarrow256_needed_sources</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005frandom-297"><code>yarrow256_random</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005fseed-295"><code>yarrow256_seed</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005fslow_005freseed-301"><code>yarrow256_slow_reseed</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow256_005fupdate-296"><code>yarrow256_update</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow_005fkey_005fevent_005festimate-304"><code>yarrow_key_event_estimate</code></a>: <a href="#Randomness">Randomness</a></li>
-<li><a href="#index-yarrow_005fkey_005fevent_005finit-303"><code>yarrow_key_event_init</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-twofish_005fdecrypt-161"><code>twofish_decrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-twofish_005fencrypt-160"><code>twofish_encrypt</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-twofish_005fset_005fkey-159"><code>twofish_set_key</code></a>: <a href="#Cipher-functions">Cipher functions</a></li>
+<li><a href="#index-yarrow256_005ffast_005freseed-309"><code>yarrow256_fast_reseed</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005finit-303"><code>yarrow256_init</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005fis_005fseeded-307"><code>yarrow256_is_seeded</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005fneeded_005fsources-308"><code>yarrow256_needed_sources</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005frandom-306"><code>yarrow256_random</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005fseed-304"><code>yarrow256_seed</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005fslow_005freseed-310"><code>yarrow256_slow_reseed</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow256_005fupdate-305"><code>yarrow256_update</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow_005fkey_005fevent_005festimate-313"><code>yarrow_key_event_estimate</code></a>: <a href="#Randomness">Randomness</a></li>
+<li><a href="#index-yarrow_005fkey_005fevent_005finit-312"><code>yarrow_key_event_init</code></a>: <a href="#Randomness">Randomness</a></li>
    </ul><div class="footnote">
 <hr>
 <a name="texinfo-footnotes-in-document"></a><h4>Footnotes</h4><p class="footnote"><small>[<a name="fn-1" href="#fnd-1">1</a>]</small> Actually, the computation is not done like this, it is
@@ -3610,7 +3895,7 @@ theorem (<acronym>CRT</acronym>). But the result is the same.</p>
 <!--
 
 Local Variables:
-coding: iso-8859-1
+coding: utf-8
 End:
 
 -->
