@@ -58,7 +58,7 @@ check-here:
 dvi installcheck uninstallcheck:
 	true
 
-all-here: $(TARGETS) $(DOCTARGETS)
+all-here: $(TARGETS)
 
 nettle_SOURCES = aes-decrypt-internal.c aes-decrypt.c \
 		 aes-encrypt-internal.c aes-encrypt.c aes-encrypt-table.c \
