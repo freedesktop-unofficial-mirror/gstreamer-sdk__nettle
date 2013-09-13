@@ -245,15 +245,6 @@ des.$(OBJEXT): des.c des.h $(des_headers)
 	$(COMPILE) $(SHLIBCFLAGS) -c $*.s -o $@
 	echo "$@ : $< $(srcdir)/asm.m4 machine.m4 config.m4" >$@.d 
 
-# Texinfo rules
-.texinfo.info:
-	cd $(srcdir) && $(MAKEINFO) --output $@ `basename "$<"`
-
-.texinfo.html:
-	cd $(srcdir) && $(MAKEINFO) --html --no-split \
-	  --output $@T `basename "$<"` \
-	  && test -s $@T && mv -f $@T $@
-
 .texinfo.dvi:
 	cd $(srcdir) && texi2dvi -b `basename "$<"`
 
